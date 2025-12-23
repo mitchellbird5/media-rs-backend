@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 
-from src.models.content import ContentModel
-from src.types.model import ContentSimilarity, IdType
+from models.content import ContentModel
+from types.model import ContentSimilarity, IdType
 
 
 @pytest.fixture

@@ -1,23 +1,23 @@
 # main.py
-from src.utils.load_data import (
+from utils.load_data import (
     load_dataframe,
     add_tags_to_movies,
     get_user_item_matrix,
     add_user_ratings
 )
-from src.utils.concatenate_features import concat_string_columns
-from src.utils.convert_id import (
+from utils.concatenate_features import concat_string_columns
+from utils.convert_id import (
     get_id_from_value,
     get_value_from_id,
     get_result_from_similarity
 )
 
-from src.models.content import ContentModel
-from src.models.collab import CollaborativeModel
-from src.models.hybrid import HybridModel
-from src.types.rating import Rating
+from models.content import ContentModel
+from models.collab import CollaborativeModel
+from models.hybrid import HybridModel
+from rs_types.rating import Rating
 
-from src.types.model import CollabMethod
+from rs_types.model import CollabMethod
 
 # Step 1: Load movie data
 movies = load_dataframe('data/raw/ml-latest-small/movies.csv')

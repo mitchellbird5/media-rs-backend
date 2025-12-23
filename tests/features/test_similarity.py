@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.features.similarity import (
+from features.similarity import (
     compute_topk_similarity,
 )
 

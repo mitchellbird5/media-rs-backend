@@ -3,10 +3,10 @@ import numpy as np
 
 from typing import List
 
-from src.models.base import BaseRecommender
-from src.features.similarity import compute_topk_similarity
+from models.base import BaseRecommender
+from features.similarity import compute_topk_similarity
 
-from src.types.model import IdType, ContentSimilarity, CollabMethod
+from types.model import IdType, ContentSimilarity, CollabMethod
 
 class CollaborativeModel(BaseRecommender):
     def __init__(

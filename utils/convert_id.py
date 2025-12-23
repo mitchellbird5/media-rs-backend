@@ -1,9 +1,9 @@
 import pandas as pd
 
 from typing import List
-from src.types.model import ContentSimilarity, IdType
+from rs_types.model import ContentSimilarity, IdType
 
-from src.utils.content_wrapper import get_id_from_similarity_result
+from utils.content_wrapper import get_id_from_similarity_result
 
 def get_id_from_value(
     df: pd.DataFrame,

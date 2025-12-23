@@ -2,10 +2,10 @@
 import pandas as pd
 
 from typing import List, Tuple
-from src.types.rating import Rating
-from src.types.model import IdType
+from rs_types.rating import Rating
+from rs_types.model import IdType
 
-from src.utils.convert_id import (
+from utils.convert_id import (
     get_id_from_value,
 )
 

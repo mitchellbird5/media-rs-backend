@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from typing import List, Dict, Any
 
-from src.types.model import ContentSimilarity
+from rs_types.model import ContentSimilarity
 
 
 def compute_topk_similarity(

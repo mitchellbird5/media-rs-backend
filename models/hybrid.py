@@ -2,13 +2,13 @@
 import pandas as pd
 
 from typing import List
-from src.types.model import IdType
+from types.model import IdType
 
-from src.models.base import BaseRecommender
-from src.models.content import ContentModel
-from src.models.collab import CollaborativeModel
+from models.base import BaseRecommender
+from models.content import ContentModel
+from models.collab import CollaborativeModel
 
-from src.types.model import IdType
+from types.model import IdType
 
 class HybridModel(BaseRecommender):
     def __init__(

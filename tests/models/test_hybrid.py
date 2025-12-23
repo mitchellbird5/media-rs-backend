@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
-from src.models.hybrid import HybridModel
-from src.models.content import ContentModel
-from src.models.collab import CollaborativeModel
-from src.types.model import CollabMethod
+from models.hybrid import HybridModel
+from models.content import ContentModel
+from models.collab import CollaborativeModel
+from rs_types.model import CollabMethod
 
 
 @pytest.fixture

@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 
-from src.models.collab import CollaborativeModel
-from src.types.model import CollabMethod, ContentSimilarity, IdType
+from models.collab import CollaborativeModel
+from rs_types.model import CollabMethod, ContentSimilarity, IdType
 
 
 @pytest.fixture
