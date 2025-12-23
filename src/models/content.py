@@ -3,7 +3,8 @@ import numpy as np
 
 from typing import List, Dict
 
-from src.features.similarity import compute_tfidf_matrix, compute_topk_similarity
+from src.features.similarity import compute_topk_similarity
+from src.features.tfidf import compute_tfidf_matrix
 from src.models.base import BaseRecommender
 
 from src.types.model import IdType, ContentSimilarity

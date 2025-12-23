@@ -1,20 +1,9 @@
-# utils/similarity.py
 import numpy as np
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.neighbors import NearestNeighbors
 from typing import List, Dict, Any
 
 from src.types.model import ContentSimilarity
 
-def compute_tfidf_matrix(combined_text: List[str], max_features=5000):
-    """
-    Returns the TF-IDF matrix.
-    """
-    vectorizer = TfidfVectorizer(stop_words='english', max_features=max_features)
-    tfidf_matrix = vectorizer.fit_transform(combined_text)
-    return tfidf_matrix
 
 def compute_topk_similarity(
     matrix: np.ndarray,
@@ -25,6 +14,9 @@ def compute_topk_similarity(
     Compute top-k nearest neighbors using cosine similarity.
     Returns dict {item_id: [(neighbor_id, similarity), ...]}
     """
+    n_samples = matrix.shape[0]
+    k = min(k, n_samples - 1)
+    
     model = NearestNeighbors(metric="cosine", n_neighbors=k+1)
     model.fit(matrix)
     distances, indices = model.kneighbors(matrix)
