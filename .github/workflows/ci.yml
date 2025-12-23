@@ -35,4 +35,5 @@ jobs:
 
       - name: Run tests
         run: |
+          export PYTHONPATH="${PYTHONPATH}:${GITHUB_WORKSPACE}/src"
           poetry run pytest -v
