@@ -1,44 +1,43 @@
-# # src/models/hybrid.py
-# import pandas as pd
+# src/models/hybrid.py
+import pandas as pd
 
-# from src.models.base import BaseRecommender
-# from src.models.content import ContentModel
-# from src.models.item_collab import ItemCollaborativeModel
-# from utils.load_data import get_movie_id
+from typing import List
+from src.types.model import IdType
 
+from src.models.base import BaseRecommender
+from src.models.content import ContentModel
+from src.models.collab import CollaborativeModel
 
-# class HybridModel(BaseRecommender):
-#     def __init__(
-#         self,
-#         movies: pd.DataFrame,
-#         content_model: ContentModel,
-#         collaborative_model: ItemCollaborativeModel,
-#         alpha: float = 0.7
-#     ):
-#         super().__init__(movies)
-#         self.content_model = content_model
-#         self.collaborative_model = collaborative_model
-#         self.alpha = alpha
+from src.types.model import IdType
 
-#     def recommend(self, title: str, top_n: int) -> pd.DataFrame:
-#         movie_id = get_movie_id(title, self.movies)
+class HybridModel(BaseRecommender):
+    def __init__(
+        self,
+        ids: List[IdType],
+        content_model: ContentModel,
+        collaborative_model: CollaborativeModel,
+        alpha: float = 0.7
+    ):
+        self.ids = ids
+        self.content_model = content_model
+        self.collaborative_model = collaborative_model
+        self.alpha = alpha
 
-#         content = dict(self.content_model.neighbors[movie_id])
-#         item = dict(self.collaborative_model.item_neighbors[movie_id])
+    def recommend(self, item_id: IdType, top_n: int) -> List[int]:
+        content = dict(self.content_model.neighbors[item_id])
+        item = dict(self.collaborative_model.neighbors[item_id])
 
-#         all_ids = set(content) | set(item)
+        all_ids = set(content) | set(item)
 
-#         scores = {
-#             mid: self.alpha * content.get(mid, 0.0)
-#             + (1 - self.alpha) * item.get(mid, 0.0)
-#             for mid in all_ids
-#         }
+        scores = {
+            mid: self.alpha * content.get(mid, 0.0)
+            + (1 - self.alpha) * item.get(mid, 0.0)
+            for mid in all_ids
+        }
 
-#         top_ids = (
-#             pd.Series(scores)
-#             .sort_values(ascending=False)
-#             .head(top_n)
-#             .index.tolist()
-#         )
-
-#         return self._movies_from_ids(top_ids)
+        return (
+            pd.Series(scores)
+            .sort_values(ascending=False)
+            .head(top_n)
+            .index.tolist()
+        )

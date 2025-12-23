@@ -1,8 +1,7 @@
 # src/models/content.py
-import pandas as pd
 import numpy as np
 
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict
 
 from src.features.similarity import compute_tfidf_matrix, compute_topk_similarity
 from src.models.base import BaseRecommender
@@ -23,7 +22,7 @@ class ContentModel(BaseRecommender):
         self,
         ids: List[IdType],
         features: List[str],
-        k: int,
+        k: int = 50,
         max_features: int = 5000
     ):
         self.ids = ids

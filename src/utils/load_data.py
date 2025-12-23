@@ -11,7 +11,7 @@ def load_dataframe(csv_path: str) -> pd.DataFrame:
     return df
 
 def get_user_item_matrix(ratings: pd.DataFrame) -> pd.DataFrame:
-    return ratings.pivot(index='userId', columns='movieId', values='rating').fillna(0)
+    return ratings.pivot(index='userId', columns='movieId', values='rating').fillna(0).values
 
 def add_tags_to_movies(
     movies: pd.DataFrame, 
