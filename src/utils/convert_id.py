@@ -21,10 +21,7 @@ def get_id_from_value(
     mask = df[search_column].isin(keys)
     id = df[mask][target_column].values
     
-    if len(id) > 1:
-        raise ValueError(f"Multiple results found for '{key}")
-    
-    return id[0]
+    return id
 
 
 def get_value_from_id(

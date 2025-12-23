@@ -27,7 +27,7 @@ class CollaborativeModel(BaseRecommender):
     def neighbors(self):
         if self._neighbors is None:
             self._neighbors = compute_topk_similarity(
-                self._get_uim(),
+                self.user_item_matrix,
                 index_labels=self.ids,
                 k=self.k
             )
@@ -37,11 +37,3 @@ class CollaborativeModel(BaseRecommender):
         if item_id not in self.neighbors:
             raise ValueError(f"Item ID {item_id} not found")
         return self.neighbors[item_id][:top_n]
-
-    def _get_uim(self):
-        if self.collab_method==CollabMethod.ITEM:
-            return self.user_item_matrix
-        elif self.collab_method==CollabMethod.USER:
-            return self.user_item_matrix.T
-        else:
-            raise ValueError(f"Incompatible method {self.collab_method}")
