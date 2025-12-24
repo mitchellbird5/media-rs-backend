@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 from media_rs.models.collab import CollaborativeModel
-from media_rs.rs_types.model import CollabMethod, ContentSimilarity, IdType
+from media_rs.rs_types.model import CollabMethod
 
 
 @pytest.fixture

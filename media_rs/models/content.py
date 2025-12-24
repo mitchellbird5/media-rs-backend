@@ -3,11 +3,11 @@ import numpy as np
 
 from typing import List, Dict
 
-from features.similarity import compute_topk_similarity
-from features.tfidf import compute_tfidf_matrix
-from models.base import BaseRecommender
+from media_rs.features.similarity import compute_topk_similarity
+from media_rs.features.tfidf import compute_tfidf_matrix
+from media_rs.models.base import BaseRecommender
 
-from rs_types.model import IdType, ContentSimilarity
+from media_rs.rs_types.model import IdType, ContentSimilarity
 
 class ContentModel(BaseRecommender):
     """

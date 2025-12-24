@@ -4,9 +4,9 @@ import pandas as pd
 from typing import List
 from rs_types.model import IdType
 
-from models.base import BaseRecommender
-from models.content import ContentModel
-from models.collab import CollaborativeModel
+from media_rs.models.base import BaseRecommender
+from media_rs.models.content import ContentModel
+from media_rs.models.collab import CollaborativeModel
 
 class HybridModel(BaseRecommender):
     def __init__(
