@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.features.tfidf import (
+from media_rs.features.tfidf import (
     compute_tfidf_matrix
 )
 

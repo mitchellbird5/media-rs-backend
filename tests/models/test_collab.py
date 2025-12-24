@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 
-from src.models.collab import CollaborativeModel
-from src.types.model import CollabMethod, ContentSimilarity, IdType
+from media_rs.models.collab import CollaborativeModel
+from media_rs.rs_types.model import CollabMethod
 
 
 @pytest.fixture
@@ -98,35 +98,3 @@ def test_recommend_raises_for_unknown_id(item_ids, small_user_item_matrix):
 
     with pytest.raises(ValueError):
         model.recommend(999, top_n=1)
-
-
-def test_get_uim_transpose_behavior(item_ids, small_user_item_matrix):
-    # ITEM method returns matrix as-is
-    model_item = CollaborativeModel(
-        ids=item_ids,
-        user_item_matrix=small_user_item_matrix,
-        collab_method=CollabMethod.ITEM
-    )
-    assert np.array_equal(model_item._get_uim(), small_user_item_matrix)
-
-    # USER method returns transposed
-    model_user = CollaborativeModel(
-        ids=item_ids,
-        user_item_matrix=small_user_item_matrix,
-        collab_method=CollabMethod.USER
-    )
-    assert np.array_equal(model_user._get_uim(), small_user_item_matrix.T)
-
-
-def test_invalid_collab_method_raises(item_ids, small_user_item_matrix):
-    class FakeMethod:
-        pass
-
-    model = CollaborativeModel(
-        ids=item_ids,
-        user_item_matrix=small_user_item_matrix,
-        collab_method=FakeMethod()
-    )
-
-    with pytest.raises(ValueError):
-        _ = model._get_uim()

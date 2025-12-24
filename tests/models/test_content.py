@@ -1,9 +1,7 @@
 import pytest
 import numpy as np
 
-from src.models.content import ContentModel
-from src.types.model import ContentSimilarity, IdType
-
+from media_rs.models.content import ContentModel
 
 @pytest.fixture
 def sample_data():
