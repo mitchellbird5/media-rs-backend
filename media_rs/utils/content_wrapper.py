@@ -1,5 +1,5 @@
 from typing import List
-from src.types.model import IdType, ContentSimilarity
+from media_rs.rs_types.model import IdType, ContentSimilarity
 
 def get_id_from_similarity_result(
     similarity: List[ContentSimilarity]
