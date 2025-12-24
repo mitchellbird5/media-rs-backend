@@ -7,7 +7,7 @@ from features.similarity import compute_topk_similarity
 from features.tfidf import compute_tfidf_matrix
 from models.base import BaseRecommender
 
-from types.model import IdType, ContentSimilarity
+from rs_types.model import IdType, ContentSimilarity
 
 class ContentModel(BaseRecommender):
     """

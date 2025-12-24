@@ -6,7 +6,7 @@ from typing import List
 from models.base import BaseRecommender
 from features.similarity import compute_topk_similarity
 
-from types.model import IdType, ContentSimilarity, CollabMethod
+from rs_types.model import IdType, ContentSimilarity, CollabMethod
 
 class CollaborativeModel(BaseRecommender):
     def __init__(
