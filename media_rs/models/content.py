@@ -1,57 +1,41 @@
 # src/models/content.py
 import numpy as np
+import pickle
 
-from typing import List, Dict
+from typing import List, Dict, Tuple, Optional
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
 
-from media_rs.features.similarity import compute_topk_similarity
-from media_rs.features.tfidf import compute_tfidf_matrix
 from media_rs.models.base import BaseRecommender
-
 from media_rs.rs_types.model import IdType, ContentSimilarity
 
-class ContentModel(BaseRecommender):
-    """
-    Generic content-based recommender.
 
-    Items can be any type as long as they are represented as dicts:
-        {
-            "id": unique identifier,
-            "features": string (concatenated features)
-        }
-    """
+class ContentModel(BaseRecommender):
     def __init__(
         self,
         ids: List[IdType],
-        features: List[str],
-        k: int = 50,
-        max_features: int = 5000
+        topk_graph:  Dict[int, List[Tuple[int, float]]],
+        embeddings: np.ndarray,
+        vectorizer: TfidfVectorizer,
+        svd: TruncatedSVD
     ):
         self.ids = ids
-        self.features = features
-        self.k = k
-        self.max_features = max_features
-
-        self._tfidf_matrix: np.ndarray | None = None
-        self._neighbors: dict | None = None
-
-    @property
-    def tfidf_matrix(self) -> np.ndarray:
-        if self._tfidf_matrix is None:
-            self._tfidf_matrix = compute_tfidf_matrix(self.features)
-        return self._tfidf_matrix
-
-    @property
-    def neighbors(self) -> Dict[IdType, List[ContentSimilarity]]:
-        if self._neighbors is None:
-            self._neighbors = compute_topk_similarity(
-                self.tfidf_matrix,
-                index_labels=self.ids,
-                k=self.k
-            )
-        return self._neighbors
+        self.topk_graph = topk_graph
+        self.embeddings = embeddings
+        self.vectorizer = vectorizer
+        self.svd = svd
 
     def recommend(self, item_id: IdType, top_n: int) -> List[ContentSimilarity]:
-        if item_id not in self.neighbors:
-            raise ValueError(f"Item ID {item_id} not found")
-        return self.neighbors[item_id][:top_n]
+        return self.topk_graph[item_id][:top_n]
 
+    def recommend_from_text(self, text: str, top_n: int = 10) -> List[ContentSimilarity]:
+        if self.vectorizer is None or self.svd is None or self.embeddings is None:
+            raise RuntimeError("Cold-start not enabled")
+
+        vec = self.vectorizer.transform([text])
+        emb = self.svd.transform(vec).astype("float32")
+
+        sims = emb @ self.embeddings.T
+        top_idx = np.argsort(-sims[0])[:top_n]
+
+        return [(self.ids[i], float(sims[0][i])) for i in top_idx]
