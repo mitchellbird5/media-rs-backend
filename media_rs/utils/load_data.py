@@ -1,5 +1,7 @@
 # src/load_data.py
 import pandas as pd
+import numpy as np
+import pickle
 
 from typing import List, Tuple
 from media_rs.rs_types.rating import Rating
@@ -53,3 +55,29 @@ def add_user_ratings(
     })
     
     return user_id, pd.concat([ratings, new_ratings_df], ignore_index=True)
+
+# ----------------------------
+# 4. Save and Load Utilities
+# ----------------------------
+def save_numpy(array: np.ndarray, path: str):
+    np.save(path, array)
+
+def load_numpy(path: str) -> np.ndarray:
+    return np.load(path)
+
+def save_pickle(obj, path: str):
+    with open(path, "wb") as f:
+        pickle.dump(obj, f)
+
+def load_pickle(path: str):
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
+# ----------------------------
+# 5. Generic Metadata Save
+# ----------------------------
+def save_metadata(df: pd.DataFrame, path: str):
+    df.to_parquet(path, index=False)
+
+def load_metadata(path: str) -> pd.DataFrame:
+    return pd.read_parquet(path)
