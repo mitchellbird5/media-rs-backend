@@ -27,20 +27,16 @@ def get_id_from_value(
 def get_value_from_id(
     df: pd.DataFrame,
     id: List[IdType],
-    search_column: str,
 ) -> pd.DataFrame:
-    mask = df[search_column].isin(id)
+    mask = df.index.isin(id)
     return df[mask]
 
 
 def get_result_from_similarity(
     df: pd.DataFrame,
-    keys: List[IdType],
-    search_column: str,
     result: List[ContentSimilarity]
 ) -> IdType:
     return get_value_from_id(
         df=df,
         id=get_id_from_similarity_result(result),
-        search_column=search_column,
-    )[keys]
+    )
