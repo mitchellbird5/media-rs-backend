@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from media_rs.rs_types.rating import Rating
 from media_rs.rs_types.model import IdType
 
@@ -32,29 +32,25 @@ def add_tags_to_movies(
     movies['tag'] = movies['tag'].fillna('')
     return movies
 
-def add_user_ratings(
-    ratings: pd.DataFrame,
+def get_user_ratings(
     movies: pd.DataFrame,
     new_ratings: List[Rating],
-) -> Tuple[IdType, pd.DataFrame]:
+    movieId_to_idx: Dict[int, int]
+) -> Dict[int, float]:
     
-    user_id = int(ratings['userId'].max()) + 1
+    titles = [r.title for r in new_ratings]
+    ratings = [r.rating for r in new_ratings]
     
-    movie_ids = get_id_from_value(
+    ids = get_id_from_value(
         df=movies,
-        keys=[r.title for r in new_ratings],
-        search_column='title',
+        keys=titles, 
+        search_column='title', 
         target_column='movieId'
     )
-
     
-    new_ratings_df = pd.DataFrame({
-        'userId': user_id,
-        'movieId': movie_ids,
-        'rating': [r.rating for r in new_ratings],
-    })
+    idx = [movieId_to_idx[id] for id in ids]
     
-    return user_id, pd.concat([ratings, new_ratings_df], ignore_index=True)
+    return {i:r for i, r in zip(idx, ratings)}
 
 # ----------------------------
 # 4. Save and Load Utilities

@@ -7,7 +7,7 @@ from media_rs.utils.load_data import (
     load_dataframe,
     add_tags_to_movies,
     get_user_item_matrix,
-    add_user_ratings
+    get_user_ratings
 )
 from media_rs.utils.convert_id import (
     get_id_from_value,
@@ -63,7 +63,7 @@ svd = pickle.load(open(svd_path, "rb"))
 faiss_index = faiss.read_index(faiss_index_path)
 
 
-movie_name = "Toy Story (1995)"
+movie_name = "Schindler's List (1993)"
 tags_to_include=[
     'title',
     'genres',
@@ -97,6 +97,7 @@ user_ratings = [
         rating=4
     ),
 ]
+new_ratings = get_user_ratings(movies, user_ratings, movieId_to_idx=movieId_to_idx)
 
 movie_indices = movies["movieId"].map(movieId_to_idx).to_numpy()
 
@@ -109,6 +110,7 @@ movie_id = get_id_from_value(
 
 item_idx = movieId_to_idx[movie_id]
 user_idx = userId_to_idx[1]
+
 
 rs_content = ContentModel(
     ids=movie_indices,
@@ -130,6 +132,7 @@ content_text_movies = get_result_from_similarity(
     result=content_text
 )
 
+
 rs_item = ItemItemCollaborativeModel(
     ids=movie_indices,
     topk_graph=topk_graph_cf
@@ -140,29 +143,49 @@ item_movies = get_result_from_similarity(
     result=item_similarity
 )
 
+
 rs_user = UserCollaborativeModel(
     user_embeddings=user_embeddings,
     faiss_index=faiss_index,
     user_item_matrix=user_item_matrix
 )
-user_similarity = rs_user.recommend(user_idx)
-user_movies = get_result_from_similarity(
+user_existing_similarity = rs_user.recommend_existing_user(user_idx)
+user_existing_movies = get_result_from_similarity(
     df=movies,
-    result=user_similarity
+    result=user_existing_similarity
 )
+user_ratings_similarity = rs_user.recommend_from_ratings(
+    ratings=new_ratings,
+    item_embeddings=item_embeddings
+)
+user_rating_movies = get_result_from_similarity(
+    df=movies,
+    result=user_ratings_similarity
+)
+
 
 rs_hybrid = HybridModel(
     content_model=rs_content,
     item_collab_model=rs_item,
     user_collab_model=rs_user
 )
-hybrid_similarity = rs_hybrid.recommend(
+hybrid_existing_similarity = rs_hybrid.recommend_existing_user(
     item_idx=item_idx,
     user_idx=user_idx
 )
-hybrid_movies = get_result_from_similarity(
+hybrid_existing_movies = get_result_from_similarity(
     df=movies,
-    result=hybrid_similarity
+    result=hybrid_existing_similarity
 )
+hybrid_rating_similarity = rs_hybrid.recommend_from_ratings(
+    item_idx=item_idx,
+    new_user_ratings=new_ratings,
+    item_embeddings=item_embeddings
+)
+hybrid_rating_movies = get_result_from_similarity(
+    df=movies,
+    result=hybrid_rating_similarity
+)
+
 
 print()

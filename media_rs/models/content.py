@@ -1,16 +1,14 @@
 # src/models/content.py
 import numpy as np
-import pickle
 
 from typing import List, Dict, Tuple, Optional
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 
-from media_rs.models.base import BaseRecommender
 from media_rs.rs_types.model import IdType, ContentSimilarity
 
 
-class ContentModel(BaseRecommender):
+class ContentModel:
     def __init__(
         self,
         ids: List[IdType],
