@@ -38,7 +38,6 @@ item_cf_topk_path = wdir.joinpath("movies_item_topk_cf.pkl")
 user_item_matrix_path = wdir.joinpath("user_item_matrix.npz")
 
 item_embeddings_path = wdir.joinpath("movies_item_embeddings.npy")
-user_embeddings_path = wdir.joinpath("movies_user_embeddings.npy")
 
 vectorizer_path = wdir.joinpath("movies_vectorizer.pkl")
 svd_path = wdir.joinpath("movies_svd.pkl")
@@ -60,7 +59,6 @@ with open(item_cf_topk_path, "rb") as f:
 user_item_matrix = load_npz(user_item_matrix_path)
     
 item_embeddings = np.load(item_embeddings_path)
-user_embeddings = np.load(user_embeddings_path)
 
 vectorizer = pickle.load(open(vectorizer_path, "rb"))
 svd = pickle.load(open(svd_path, "rb"))
@@ -150,22 +148,16 @@ item_movies = get_result_from_similarity(
 
 
 rs_user = UserCollaborativeModel(
-    user_embeddings=user_embeddings,
     faiss_index=faiss_index,
     user_item_matrix=user_item_matrix
 )
-user_existing_similarity = rs_user.recommend_existing_user(user_idx)
-user_existing_movies = get_result_from_similarity(
-    df=movies,
-    result=user_existing_similarity
-)
-user_ratings_similarity = rs_user.recommend_from_ratings(
+user_similarity = rs_user.recommend(
     ratings=new_ratings,
     item_embeddings=item_embeddings
 )
-user_rating_movies = get_result_from_similarity(
+user_movies = get_result_from_similarity(
     df=movies,
-    result=user_ratings_similarity
+    result=user_similarity
 )
 
 
@@ -174,22 +166,14 @@ rs_hybrid = HybridModel(
     item_collab_model=rs_item,
     user_collab_model=rs_user
 )
-hybrid_existing_similarity = rs_hybrid.recommend_existing_user(
-    item_idx=item_idx,
-    user_idx=user_idx
-)
-hybrid_existing_movies = get_result_from_similarity(
-    df=movies,
-    result=hybrid_existing_similarity
-)
-hybrid_rating_similarity = rs_hybrid.recommend_from_ratings(
+hybrid_similarity = rs_hybrid.recommend(
     item_idx=item_idx,
     new_user_ratings=new_ratings,
     item_embeddings=item_embeddings
 )
-hybrid_rating_movies = get_result_from_similarity(
+hybrid_movies = get_result_from_similarity(
     df=movies,
-    result=hybrid_rating_similarity
+    result=hybrid_similarity
 )
 
 
