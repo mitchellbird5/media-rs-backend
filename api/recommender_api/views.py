@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from api.recommender_api.serializers import (
-    RatingsInputSerializer,
-    TopNInputSerializer,
-    RecommendationSerializer,
-    RecommendationListSerializer
+    ContentRecommendationInputSerializer,
+    ContentDescriptionInputSerializer,
+    UserCFInputSerializer,
+    HybridInputSerializer,
 )
 from api.recommender_api.services.content_services import (
     get_content_recommendations,
@@ -16,6 +16,9 @@ from api.recommender_api.services.collab_services import (
     get_item_cf_recommendations,
     get_user_cf_recommendations
 )
+from api.recommender_api.services.hybrid_services import (
+    get_hybrid_recommendations
+)
 
 
 # -----------------------------
@@ -23,7 +26,7 @@ from api.recommender_api.services.collab_services import (
 # -----------------------------
 class ContentRecommendationAPI(APIView):
     def get(self, request):
-        serializer = TopNInputSerializer(data=request.query_params)
+        serializer = ContentRecommendationInputSerializer(data=request.query_params)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -43,7 +46,7 @@ class ContentRecommendationAPI(APIView):
 # -----------------------------
 class ContentDescriptionRecommendationAPI(APIView):
     def get(self, request):
-        serializer = TopNInputSerializer(data=request.query_params)
+        serializer = ContentDescriptionInputSerializer(data=request.query_params)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -64,7 +67,7 @@ class ContentDescriptionRecommendationAPI(APIView):
 # -----------------------------
 class ItemCFRecommendationAPI(APIView):
     def get(self, request):
-        serializer = TopNInputSerializer(data=request.query_params)
+        serializer = ContentRecommendationInputSerializer(data=request.query_params)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -85,7 +88,7 @@ class ItemCFRecommendationAPI(APIView):
 # -----------------------------
 class UserCFRecommendationAPI(APIView):
     def post(self, request):
-        serializer = RatingsInputSerializer(data=request.data)
+        serializer = UserCFInputSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -97,6 +100,37 @@ class UserCFRecommendationAPI(APIView):
         try:
             recs = get_user_cf_recommendations(
                 ratings=ratings,
+                top_n=top_n,
+                k_similar_users=k_similar_users
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to get recommendations: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(recs)
+
+class HybridRecommendationAPI(APIView):
+    def post(self, request):
+        serializer = HybridInputSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        movie_title = data["movie_title"]
+        alpha = data["alpha"]
+        beta = data["beta"]
+        ratings = data["ratings"]
+        top_n = data["top_n"]
+        k_similar_users = data["k_similar_users"]
+
+        try:
+            recs = get_hybrid_recommendations(
+                movie_title=movie_title,
+                ratings=ratings,
+                alpha=alpha,
+                beta=beta,
                 top_n=top_n,
                 k_similar_users=k_similar_users
             )
