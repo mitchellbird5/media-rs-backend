@@ -1,7 +1,9 @@
 import numpy as np
 import faiss
 
-from typing import List, Dict, Tuple, Optional
+from scipy.sparse import csr_matrix
+
+from typing import List, Dict, Tuple, Union
 from media_rs.rs_types.model import IdType, ContentSimilarity
 
 class ItemItemCollaborativeModel:
@@ -23,7 +25,7 @@ class UserCollaborativeModel:
         self,
         user_embeddings: np.ndarray,        # shape (num_users, embedding_dim)
         faiss_index: faiss.Index,
-        user_item_matrix: np.ndarray        # shape (num_users, num_items)
+        user_item_matrix: csr_matrix        # shape (num_users, num_items)
     ):
         self.user_embeddings = user_embeddings.astype(np.float32)
         self.index = faiss_index
@@ -37,12 +39,16 @@ class UserCollaborativeModel:
         top_n: int = 10,
         k_similar_users: int = 50
     ) -> List[ContentSimilarity]:
-        """
-        Recommend items for an existing user by index
-        """
-        user_emb = self.user_embeddings[user_idx:user_idx+1]  # keep 2D
-        rated_mask = self.user_item_matrix[user_idx]
-        return self._recommend_from_embedding(user_emb, rated_mask, top_n, k_similar_users)
+
+        user_emb = self.user_embeddings[user_idx:user_idx + 1]
+        rated_mask = self.user_item_matrix.getrow(user_idx)
+
+        return self._recommend_from_embedding(
+            user_emb,
+            rated_mask,
+            top_n,
+            k_similar_users
+        )
 
     def recommend_from_ratings(
         self,
@@ -67,32 +73,56 @@ class UserCollaborativeModel:
 
         return self._recommend_from_embedding(user_emb, rated_mask, top_n, k_similar_users)
 
+
     def _recommend_from_embedding(
         self,
         user_emb: np.ndarray,
-        rated_mask: np.ndarray,
+        rated_mask: Union[np.ndarray, csr_matrix],
         top_n: int,
         k_similar_users: int
     ) -> List[ContentSimilarity]:
-        """
-        Core FAISS + aggregation logic
-        """
-        # Normalize input embedding (cosine similarity)
+
+        # Normalize for cosine similarity
         faiss.normalize_L2(user_emb)
 
-        # Query FAISS for similar users
+        # Query FAISS
         D, I = self.index.search(user_emb, k_similar_users)
         similar_users = I[0]
         similarities = D[0]
 
-        # Aggregate scores from similar users
-        scores = np.zeros(self.num_items, dtype=np.float32)
+        # ---- SPARSE AGGREGATION ----
+        # Accumulate weighted rows into a sparse vector
+        agg_scores = None  # csr_matrix (1, num_items)
+
         for sim_user_idx, sim in zip(similar_users, similarities):
-            scores += sim * self.user_item_matrix[sim_user_idx]
+            if sim <= 0:
+                continue
 
-        # Mask already rated items
-        scores[rated_mask > 0] = -np.inf
+            row = self.user_item_matrix.getrow(sim_user_idx)
+            if row.nnz == 0:
+                continue
 
-        # Return top-N items as (item_idx, score)
-        top_indices = np.argsort(-scores)[:top_n]
-        return [(i, float(scores[i])) for i in top_indices]
+            weighted_row = row.multiply(sim)
+
+            if agg_scores is None:
+                agg_scores = weighted_row
+            else:
+                agg_scores += weighted_row
+
+        if agg_scores is None:
+            return []
+
+        # Convert ONCE to dense
+        scores = agg_scores.toarray().ravel()
+
+        # ---- MASK ALREADY RATED ITEMS ----
+        if isinstance(rated_mask, csr_matrix):
+            scores[rated_mask.indices] = -np.inf
+        else:
+            scores[rated_mask] = -np.inf
+
+        # ---- TOP-N ----
+        top_indices = np.argpartition(-scores, top_n)[:top_n]
+        top_indices = top_indices[np.argsort(-scores[top_indices])]
+
+        return [(int(i), float(scores[i])) for i in top_indices]

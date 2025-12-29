@@ -2,6 +2,9 @@
 import numpy as np
 import pickle
 import faiss
+from pathlib import Path
+
+from scipy.sparse import load_npz
 
 from media_rs.utils.load_data import (
     load_dataframe,
@@ -21,24 +24,26 @@ from media_rs.models.hybrid import HybridModel
 
 from media_rs.rs_types.rating import Rating
 
-movies_csv_path = "data/movies/raw/movies.csv"
+wdir = Path("data/movies/raw/ml-latest/")
 
-movieId_to_idx_path = "data/movies/movieId_to_idx.pkl"
-idx_to_movieId_path = "data/movies/idx_to_movieId.pkl"
-userId_to_idx_path = "data/movies/users_userId_to_idx.pkl"
-idx_to_userId_path = "data/movies/users_idx_to_userId.pkl"
+movies_csv_path = wdir.joinpath("movies.csv")
 
-item_content_topk_path = "data/movies/movies_item_topk_content.pkl"
-item_cf_topk_path = "data/movies/movies_item_topk_cf.pkl"
-user_item_matrix_path = "data/movies/user_item_matrix.npy"
+movieId_to_idx_path = wdir.joinpath("movieId_to_idx.pkl")
+idx_to_movieId_path = wdir.joinpath("idx_to_movieId.pkl")
+userId_to_idx_path = wdir.joinpath("users_userId_to_idx.pkl")
+idx_to_userId_path = wdir.joinpath("users_idx_to_userId.pkl")
 
-item_embeddings_path = "data/movies/movies_item_embeddings.npy"
-user_embeddings_path = "data/movies/movies_user_embeddings.npy"
+item_content_topk_path = wdir.joinpath("movies_item_topk_content.pkl")
+item_cf_topk_path = wdir.joinpath("movies_item_topk_cf.pkl")
+user_item_matrix_path = wdir.joinpath("user_item_matrix.npz")
 
-vectorizer_path = "data/movies/movies_vectorizer.pkl"
-svd_path = "data/movies/movies_svd.pkl"
+item_embeddings_path = wdir.joinpath("movies_item_embeddings.npy")
+user_embeddings_path = wdir.joinpath("movies_user_embeddings.npy")
 
-faiss_index_path = "data/movies/users_faiss.index"
+vectorizer_path = wdir.joinpath("movies_vectorizer.pkl")
+svd_path = wdir.joinpath("movies_svd.pkl")
+
+faiss_index_path = str(wdir.joinpath("users_faiss.index"))
 
 # Step 1: Load movie data
 movies = load_dataframe(movies_csv_path)
@@ -52,7 +57,7 @@ with open(item_content_topk_path, "rb") as f:
     topk_graph_content = pickle.load(f)
 with open(item_cf_topk_path, "rb") as f:
     topk_graph_cf = pickle.load(f)
-user_item_matrix = np.load(user_item_matrix_path)
+user_item_matrix = load_npz(user_item_matrix_path)
     
 item_embeddings = np.load(item_embeddings_path)
 user_embeddings = np.load(user_embeddings_path)
@@ -63,7 +68,7 @@ svd = pickle.load(open(svd_path, "rb"))
 faiss_index = faiss.read_index(faiss_index_path)
 
 
-movie_name = "Schindler's List (1993)"
+movie_name = "Toy Story (1995)"
 tags_to_include=[
     'title',
     'genres',
