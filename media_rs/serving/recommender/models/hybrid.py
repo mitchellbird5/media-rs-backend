@@ -5,8 +5,8 @@ import numpy as np
 from typing import List, Dict
 from media_rs.rs_types.model import ContentSimilarity
 
-from media_rs.models.content import ContentModel
-from media_rs.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
+from media_rs.serving.recommender.models.content import ContentModel
+from media_rs.serving.recommender.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
 
 class HybridModel:
     def __init__(
@@ -24,31 +24,7 @@ class HybridModel:
         self.beta = beta
         self.gamma = 1.0 - alpha - beta
 
-    def recommend_existing_user(
-        self, 
-        item_idx: int, 
-        user_idx: int, 
-        top_n: int = 10
-    ) -> List[ContentSimilarity]:
-        """
-        Recommend for an existing user (by user_idx)
-        """
-        # 1. Content scores
-        content_scores = dict(self.content_model.recommend(item_idx, top_n=100))
-
-        # 2. Item-item CF scores
-        item_scores = dict(self.item_collab_model.recommend(item_idx, top_n=100))
-
-        # 3. User-user CF scores
-        user_scores = dict(self.user_collab_model.recommend_existing_user(user_idx, top_n=100))
-
-        # 4. Combine scores
-        combined_scores = self._combine_scores(content_scores, item_scores, user_scores)
-
-        # 5. Return top-N
-        return self._top_n(combined_scores, top_n)
-
-    def recommend_from_ratings(
+    def recommend(
         self,
         item_idx: int,
         new_user_ratings: Dict[int, float],
@@ -65,7 +41,7 @@ class HybridModel:
         item_scores = dict(self.item_collab_model.recommend(item_idx, top_n=100))
 
         # 3. User-user CF scores using new user ratings
-        user_scores = dict(self.user_collab_model.recommend_from_ratings(
+        user_scores = dict(self.user_collab_model.recommend(
             new_user_ratings, 
             item_embeddings, 
             top_n=100

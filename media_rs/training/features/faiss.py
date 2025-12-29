@@ -1,7 +1,6 @@
 import faiss
 import numpy as np
 from typing import Dict, List, Tuple
-import pickle
 
 # ----------------------------
 # 1. Build FAISS index

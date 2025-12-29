@@ -23,34 +23,14 @@ class ItemItemCollaborativeModel:
 class UserCollaborativeModel:
     def __init__(
         self,
-        user_embeddings: np.ndarray,        # shape (num_users, embedding_dim)
         faiss_index: faiss.Index,
         user_item_matrix: csr_matrix        # shape (num_users, num_items)
     ):
-        self.user_embeddings = user_embeddings.astype(np.float32)
         self.index = faiss_index
         self.user_item_matrix = user_item_matrix
         self.num_items = user_item_matrix.shape[1]
-        self.embedding_dim = user_embeddings.shape[1]
 
-    def recommend_existing_user(
-        self,
-        user_idx: int,
-        top_n: int = 10,
-        k_similar_users: int = 50
-    ) -> List[ContentSimilarity]:
-
-        user_emb = self.user_embeddings[user_idx:user_idx + 1]
-        rated_mask = self.user_item_matrix.getrow(user_idx)
-
-        return self._recommend_from_embedding(
-            user_emb,
-            rated_mask,
-            top_n,
-            k_similar_users
-        )
-
-    def recommend_from_ratings(
+    def recommend(
         self,
         ratings: Dict[int, float],
         item_embeddings: np.ndarray,
