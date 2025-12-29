@@ -13,27 +13,26 @@ class ItemItemCollaborativeModel:
         topk_graph:  Dict[int, List[Tuple[int, float]]],
     ):
         self.ids = ids
-        self.id_to_idx = {i: idx for idx, i in enumerate(ids)}
         self.topk_graph = topk_graph
 
     def recommend(self, item_id, top_n):
-        idx = self.id_to_idx[item_id]
-        return self.topk_graph[idx][:top_n]
+        return self.topk_graph[item_id][:top_n]
     
 class UserCollaborativeModel:
     def __init__(
         self,
         faiss_index: faiss.Index,
-        user_item_matrix: csr_matrix        # shape (num_users, num_items)
+        user_item_matrix: csr_matrix,        # shape (num_users, num_items)
+        item_embeddings: np.ndarray,
     ):
         self.index = faiss_index
         self.user_item_matrix = user_item_matrix
+        self.item_embeddings = item_embeddings
         self.num_items = user_item_matrix.shape[1]
 
     def recommend(
         self,
         ratings: Dict[int, float],
-        item_embeddings: np.ndarray,
         top_n: int = 10,
         k_similar_users: int = 50
     ) -> List[ContentSimilarity]:
@@ -41,9 +40,9 @@ class UserCollaborativeModel:
         Recommend items for a new user given a dict of {item_idx: rating}
         """
         # Compute new user embedding in same space as existing users
-        user_emb = np.zeros(item_embeddings.shape[1], dtype=np.float32)
+        user_emb = np.zeros(self.item_embeddings.shape[1], dtype=np.float32)
         for item_idx, rating in ratings.items():
-            user_emb += rating * item_embeddings[item_idx]
+            user_emb += rating * self.item_embeddings[item_idx]
         user_emb = user_emb[None, :]  # 2D
         faiss.normalize_L2(user_emb)
 
