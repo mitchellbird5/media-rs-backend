@@ -18,9 +18,9 @@ from media_rs.utils.convert_id import (
     get_result_from_similarity
 )
 
-from media_rs.models.content import ContentModel
-from media_rs.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
-from media_rs.models.hybrid import HybridModel
+from media_rs.serving.recommender.models.content import ContentModel
+from media_rs.serving.recommender.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
+from media_rs.serving.recommender.models.hybrid import HybridModel
 
 from media_rs.rs_types.rating import Rating
 

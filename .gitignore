@@ -1,5 +1,6 @@
 .env
-data/**
+venv
+data/
 
 .vscode
 /**/*pycache*
