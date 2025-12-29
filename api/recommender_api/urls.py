@@ -27,4 +27,9 @@ urlpatterns = [
         UserCFRecommendationAPI.as_view(), 
         name="user-cf-recommend"
     ),
+    path(
+        "recommend/hybrid/", 
+        UserCFRecommendationAPI.as_view(), 
+        name="hybrid-recommend"
+    ),
 ]

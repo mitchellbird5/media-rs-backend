@@ -29,22 +29,24 @@ class HybridModel:
         item_idx: int,
         new_user_ratings: Dict[int, float],
         item_embeddings: np.ndarray,
+        k_similar_users: int = 50,
         top_n: int = 10
     ) -> List[ContentSimilarity]:
         """
         Recommend for a new user given a ratings dict {item_idx: rating}
         """
         # 1. Content scores
-        content_scores = dict(self.content_model.recommend(item_idx, top_n=100))
+        content_scores = dict(self.content_model.recommend(item_idx, top_n))
 
         # 2. Item-item CF scores
-        item_scores = dict(self.item_collab_model.recommend(item_idx, top_n=100))
+        item_scores = dict(self.item_collab_model.recommend(item_idx, top_n))
 
         # 3. User-user CF scores using new user ratings
         user_scores = dict(self.user_collab_model.recommend(
-            new_user_ratings, 
-            item_embeddings, 
-            top_n=100
+            new_user_ratings=new_user_ratings, 
+            item_embeddings=item_embeddings, 
+            top_n=top_n,
+            k_similar_users=k_similar_users,
         ))
 
         # 4. Combine scores
