@@ -1,5 +1,5 @@
 import numpy as np
-from media_rs.features.embeddings import compute_item_embeddings, compute_user_embeddings
+from media_rs.training.features.embeddings import compute_item_embeddings, compute_user_embeddings
 
 def compute_item_and_user_embeddings(movies, user_item_matrix):
     # Item embeddings

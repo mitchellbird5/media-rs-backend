@@ -23,10 +23,10 @@ class ContentModel:
         self.vectorizer = vectorizer
         self.svd = svd
 
-    def recommend(self, item_id: IdType, top_n: int) -> List[ContentSimilarity]:
+    def recommend(self, item_id: IdType, top_n: int) -> List[int]:
         return self.topk_graph[item_id][:top_n]
 
-    def recommend_from_text(self, text: str, top_n: int = 10) -> List[ContentSimilarity]:
+    def recommend_from_text(self, text: str, top_n: int = 10) -> List[int]:
         if self.vectorizer is None or self.svd is None or self.embeddings is None:
             raise RuntimeError("Cold-start not enabled")
 
@@ -36,4 +36,4 @@ class ContentModel:
         sims = emb @ self.embeddings.T
         top_idx = np.argsort(-sims[0])[:top_n]
 
-        return [(self.ids[i], float(sims[0][i])) for i in top_idx]
+        return [self.ids[i] for i in top_idx]
