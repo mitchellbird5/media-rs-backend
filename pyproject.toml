@@ -21,6 +21,12 @@ build-backend = "poetry.core.masonry.api"
 [[tool.poetry.packages]]
 include = "media_rs"
 
+[[tool.poetry.source]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
 [tool.poetry.group.training.dependencies]
 sentence-transformers = ">=5.2.0,<6.0.0"
 faiss-cpu = ">=1.13.2,<2.0.0"
+torch = { version = ">=2.2,<3.0", source = "pytorch-cpu" }
