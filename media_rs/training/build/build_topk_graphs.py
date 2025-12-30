@@ -8,9 +8,9 @@ from typing import List
 from media_rs.rs_types.model import ContentSimilarity
 
 def build_item_cf_topk(
-    user_item_matrix: csr_matrix, 
-    k: int=100, 
-    batch_size: int=1000
+    user_item_matrix: csr_matrix,
+    k: int = 100,
+    batch_size: int = 1000
 ) -> List[ContentSimilarity]:
     """
     Builds similarity graph of nearest K users using cosine similarity.
@@ -30,17 +30,45 @@ def build_item_cf_topk(
     Returns:
         List[ContentSimilarity]: Top K nearest neighbour graph
     """
-    
+
+    if k <= 0:
+        raise ValueError("k must be a positive integer")
+
     num_items = user_item_matrix.shape[1]
-    topk_cf = {}
+
+    if num_items < 2:
+        raise ValueError("user_item_matrix must contain at least 2 items")
+
+    # Clamp k to a safe maximum
+    k = min(k, num_items - 1)
+
+    topk_cf: dict[int, ContentSimilarity] = {}
 
     for start in range(0, num_items, batch_size):
         end = min(start + batch_size, num_items)
+
+        # Shape: (batch_items, num_users)
         batch_matrix = user_item_matrix[:, start:end].T
+
+        # Shape: (batch_items, num_items)
         sim = cosine_similarity(batch_matrix, user_item_matrix.T)
+
         for i, item_idx in enumerate(range(start, end)):
-            top_indices = np.argsort(-sim[i])[:k+1]
-            topk_cf[item_idx] = [(j, sim[i,j]) for j in top_indices if j != item_idx]
+            # Get top k+1 to exclude self
+            top_indices = np.argpartition(
+                -sim[i], kth=k + 1
+            )[: k + 1]
+
+            neighbors = [
+                (j, float(sim[i, j]))
+                for j in top_indices
+                if j != item_idx
+            ]
+
+            # Sort final neighbors
+            neighbors.sort(key=lambda x: x[1], reverse=True)
+            topk_cf[item_idx] = neighbors[:k]
+
     return topk_cf
 
 
@@ -62,20 +90,39 @@ def build_topk_content(
         List[ContentSimilarity]: Top K nearest neighbour graph
     """
     
+    if top_k <= 0:
+        raise ValueError("top_k must be a positive integer")
+
+    if item_embeddings.ndim != 2:
+        raise ValueError("item_embeddings must be a 2D array")
+
+    num_items, dim = item_embeddings.shape
+
+    if num_items < 2:
+        raise ValueError("item_embeddings must contain at least 2 items")
+
+    # Clamp top_k safely
+    top_k = min(top_k, num_items - 1)
+
     # Normalize embeddings for cosine similarity
+    item_embeddings = item_embeddings.astype(np.float32, copy=False)
     faiss.normalize_L2(item_embeddings)
-    
-    # Create FAISS index
-    dim = item_embeddings.shape[1]
-    index = faiss.IndexFlatIP(dim)  # Inner product = cosine if vectors normalized
+
+    index = faiss.IndexFlatIP(dim)
     index.add(item_embeddings)
-    
-    # Search top-k for each item
-    distances, indices = index.search(item_embeddings, top_k + 1)  # +1 because the first is itself
-    
-    # Build mapping: item_idx -> top_k item_idx
-    topk_content = {}
-    for i, neighbors in enumerate(indices):
-        topk_content[i] = [(n, d) for n, d in zip(neighbors[1:], distances[i][1:])]  # skip self
-    
+
+    # +1 to remove self-match
+    distances, indices = index.search(item_embeddings, top_k + 1)
+
+    topk_content: dict[int, ContentSimilarity] = {}
+
+    for i in range(num_items):
+        neighbors = [
+            (int(n), float(d))
+            for n, d in zip(indices[i], distances[i])
+            if n != i
+        ][:top_k]
+
+        topk_content[i] = neighbors
+
     return topk_content
