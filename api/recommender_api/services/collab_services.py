@@ -14,7 +14,7 @@ def get_item_cf_recommendations(
     
     item_idx = ItemIndex("media_rs/serving/artifacts/item_index.pkl")
     
-    rs = get_item_cf_model(item_idx)
+    rs = get_item_cf_model()
     
     recommendations = rs.recommend(item_idx.title_to_idx[movie_title], top_n)
     return [item_idx.idx_to_title[r[0]] for r in recommendations]

@@ -158,7 +158,11 @@ class UserCollaborativeModel:
             scores[rated_mask] = -np.inf
 
         # ---- TOP-N ----
-        top_indices = np.argpartition(-scores, top_n)[:top_n]
+        top_n = min(top_n, len(scores))
+        top_indices = np.argpartition(-scores, top_n-1)[:top_n]
         top_indices = top_indices[np.argsort(-scores[top_indices])]
+        
+        # Remove masked items (score = -inf)
+        top_indices = [i for i in top_indices if scores[i] != -np.inf]
 
         return [(int(i), float(scores[i])) for i in top_indices]
