@@ -11,7 +11,14 @@ from media_rs.serving.recommender.models.collab import (
 from media_rs.utils.item_index import ItemIndex
 from media_rs.training.features.faiss import load_faiss_index
 
-def get_item_cf_model(item_index: ItemIndex) -> ItemItemCollaborativeModel:
+def get_item_cf_model() -> ItemItemCollaborativeModel:
+    """Retrieves Item collaborative filter model.
+
+    Returns:
+        ItemItemCollaborativeModel: Item collaborative filter model
+    """
+    
+    
     wdir = Path("media_rs/serving/artifacts")
     
     item_cf_topk_path = wdir.joinpath("movies_item_topk_cf.pkl")
@@ -20,11 +27,16 @@ def get_item_cf_model(item_index: ItemIndex) -> ItemItemCollaborativeModel:
         topk_graph_content = pickle.load(f)
     
     return ItemItemCollaborativeModel(
-        ids=item_index.ids,
         topk_graph=topk_graph_content
     )
     
 def get_user_cf_model() -> UserCollaborativeModel:
+    """Retrieves User collaborative filter model.
+
+    Returns:
+        UserCollaborativeModel: User collaborative filter model
+    """
+    
     wdir = Path("media_rs/serving/artifacts")
     
     faiss_index_path = wdir.joinpath("faiss_index_users.index")

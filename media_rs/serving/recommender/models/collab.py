@@ -4,27 +4,68 @@ import faiss
 from scipy.sparse import csr_matrix
 
 from typing import List, Dict, Tuple, Union
-from media_rs.rs_types.model import IdType, ContentSimilarity
+from media_rs.rs_types.model import ContentSimilarity
 
 class ItemItemCollaborativeModel:
+    """
+    Recommendation system model based on item-item collaborative filtering.
+    """
     def __init__(
         self, 
-        ids: List[IdType],
-        topk_graph:  Dict[int, List[Tuple[int, float]]],
+        topk_graph:  Dict[int, List[ContentSimilarity]],
     ):
-        self.ids = ids
+        """
+        Initialisation
+
+        Args:
+            topk_graph (Dict[int, List[ContentSimilarity]]): Top K most similar neighbours of each item
+        """
         self.topk_graph = topk_graph
 
-    def recommend(self, item_id, top_n):
+    def recommend(self, item_id: int, top_n: int) -> List[ContentSimilarity]:
+        """
+        Recommend n most similar items for item_id
+
+        Args:
+            item_id (int): ID of item to compare
+            top_n (int): Number of results to return
+
+        Returns:
+            List[ContentSimilarity]: 
+                List of results.
+                Tuple of ID of item and similarity score for each result in list
+        """
         return self.topk_graph[item_id][:top_n]
     
 class UserCollaborativeModel:
+    """
+    Recommendation system model based on user-user collaborative filtering.
+    """
     def __init__(
         self,
         faiss_index: faiss.Index,
         user_item_matrix: csr_matrix,        # shape (num_users, num_items)
         item_embeddings: np.ndarray,
     ):
+        """
+        Initialisation
+
+        Args:
+            faiss_index (faiss.Index): 
+                FAISS index built over user embedding vectors.
+                Used to efficiently retrieve the top-K most similar users
+                via cosine similarity at inference time.
+                
+            user_item_matrix (csr_matrix): 
+                Sparse user–item interaction matrix of shape
+                (num_users, num_items), where rows correspond to users
+                and columns correspond to items.
+                
+            item_embeddings (np.ndarray): 
+                Item embedding matrix of shape (num_items, embedding_dim),
+                where each row represents an item in a latent vector space.
+        """
+        
         self.index = faiss_index
         self.user_item_matrix = user_item_matrix
         self.item_embeddings = item_embeddings
@@ -33,11 +74,27 @@ class UserCollaborativeModel:
     def recommend(
         self,
         ratings: Dict[int, float],
-        top_n: int = 10,
-        k_similar_users: int = 50
+        top_n: int,
+        k_similar_users: int
     ) -> List[ContentSimilarity]:
         """
-        Recommend items for a new user given a dict of {item_idx: rating}
+        Recommend n most similar items for given ratings
+
+        Args:
+            ratings (Dict[int, float]): 
+                Ratings of movies to use in 
+                user-user collaborative filtering.
+                
+            top_n (int): 
+                Number of results to return
+                
+            k_similar_users (int):
+                Number of similar users to use in computation
+
+        Returns:
+            List[ContentSimilarity]: 
+                List of results.
+                Tuple of index of item and similarity score for each result
         """
         # Compute new user embedding in same space as existing users
         user_emb = np.zeros(self.item_embeddings.shape[1], dtype=np.float32)
