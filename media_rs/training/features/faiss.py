@@ -83,11 +83,42 @@ def query_faiss_topk(
             position and distance
         
     """
-    D, I = index.search(embeddings, k)  # D = distances, I = indices
-    topk_dict = {}
-    for i, (indices, distances) in enumerate(zip(I, D)):
-        # For cosine similarity, distances = inner product
-        topk_dict[i] = list(zip(indices.tolist(), distances.tolist()))
+    if k <= 0:
+        raise ValueError("k must be a positive integer")
+
+    if embeddings.ndim != 2:
+        raise ValueError("embeddings must be a 2D array")
+
+    num_queries = embeddings.shape[0]
+
+    if num_queries == 0:
+        return {}
+
+    # FAISS requires float32
+    embeddings = embeddings.astype(np.float32, copy=False)
+
+    # Max possible neighbors per item (excluding self)
+    max_neighbors = index.ntotal - 1
+    if max_neighbors < 1:
+        raise ValueError("FAISS index must contain at least 2 vectors")
+
+    # Clamp k safely
+    k = min(k, max_neighbors)
+
+    # Search k+1 so we can drop self-matches
+    distances, indices = index.search(embeddings, k + 1)
+
+    topk_dict: Dict[int, List[Tuple[int, float]]] = {}
+
+    for i in range(num_queries):
+        neighbors = [
+            (int(n), float(d))
+            for n, d in zip(indices[i], distances[i])
+            if n != i
+        ][:k]
+
+        topk_dict[i] = neighbors
+
     return topk_dict
 
 # ----------------------------

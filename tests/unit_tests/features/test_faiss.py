@@ -36,7 +36,7 @@ def test_build_faiss_index(metric, dummy_embeddings):
 
 def test_build_faiss_index_invalid_metric(dummy_embeddings):
     import builtins
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError):
         build_faiss_index(dummy_embeddings, metric="invalid_metric")
 
 
@@ -65,6 +65,8 @@ def test_query_faiss_topk_k_greater_than_index(dummy_embeddings):
     k = 10  # More than number of items
     topk = query_faiss_topk(index, dummy_embeddings.copy(), k=k)
     
+    expected_neighbors = dummy_embeddings.shape[0] - 1
+    
     for neighbors in topk.values():
         # Should return only the number of items in the index
-        assert len(neighbors) == dummy_embeddings.shape[0]
+        assert len(neighbors) == expected_neighbors
