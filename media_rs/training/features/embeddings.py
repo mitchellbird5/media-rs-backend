@@ -9,11 +9,21 @@ from typing import List, Dict, Tuple
 def compute_sbert_embeddings(
     item_texts: List[str]
 ) -> Tuple[SentenceTransformer, np.ndarray]:
+    """
+    Compute text embeddings using SBERT.
+
+    Args:
+        item_texts (List[str]): List of content to embed
+
+    Returns:
+        Tuple[SentenceTransformer, np.ndarray]: Tuple of model and embedding
+    """
+    
     sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
     return sbert_model, sbert_model.encode(item_texts, convert_to_numpy=True, normalize_embeddings=True)
     
 
-def compute_item_embeddings(
+def compute_tfidf_embeddings(
     item_texts: List[str],
     n_features: int = 50000,
     n_components: int = 200,

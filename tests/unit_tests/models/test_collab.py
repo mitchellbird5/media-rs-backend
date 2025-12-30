@@ -1,100 +1,91 @@
+# tests/test_collaborative_models.py
 import pytest
 import numpy as np
+import faiss
+from scipy.sparse import csr_matrix
 
-from media_rs.models.collab import CollaborativeModel
-from media_rs.rs_types.model import CollabMethod
+from media_rs.serving.recommender.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
 
-
-@pytest.fixture
-def small_user_item_matrix():
-    # 3 users x 3 items
-    # Rows: items, Columns: users
-    return np.array([
-        [5, 3, 0],   # Item 1
-        [4, 0, 0],   # Item 2
-        [1, 1, 0]    # Item 3
-    ])
+# Define ContentSimilarity for testing
+ContentSimilarity = tuple[int, float]
 
 
 @pytest.fixture
-def item_ids():
-    return [101, 102, 103]
+def mock_item_item_model():
+    topk_graph = {
+        0: [(1, 0.9), (2, 0.8)],
+        1: [(0, 0.9), (2, 0.7)]
+    }
+    return ItemItemCollaborativeModel(topk_graph)
 
 
-def test_initialization(item_ids, small_user_item_matrix):
-    model = CollaborativeModel(
-        ids=item_ids,
-        user_item_matrix=small_user_item_matrix,
-        collab_method=CollabMethod.ITEM,
-        k=2
-    )
-
-    assert model.ids == item_ids
-    assert model.k == 2
-    assert model.user_item_matrix is small_user_item_matrix
-    assert model.collab_method == CollabMethod.ITEM
-    assert model._neighbors is None
+def test_item_item_recommend(mock_item_item_model: ItemItemCollaborativeModel):
+    # Normal case
+    res = mock_item_item_model.recommend(0, 1)
+    assert res == [(1, 0.9)]
+    
+    # top_n > available
+    res = mock_item_item_model.recommend(1, 5)
+    assert res == [(0, 0.9), (2, 0.7)]
 
 
-@pytest.mark.parametrize("method", [CollabMethod.ITEM, CollabMethod.USER])
-def test_neighbors_property(item_ids, small_user_item_matrix, method):
-    model = CollaborativeModel(
-        ids=item_ids,
-        user_item_matrix=small_user_item_matrix,
-        collab_method=method,
-        k=2
-    )
-
-    neighbors = model.neighbors
-
-    # Check type and keys
-    assert isinstance(neighbors, dict)
-    assert set(neighbors.keys()) == set(item_ids)
-
-    # Each neighbor list is correct
-    for n in neighbors.values():
-        assert isinstance(n, list)
-        assert all(isinstance(x, tuple) and len(x) == 2 for x in n)
-        assert all(isinstance(x[1], float) for x in n)
-        # Length should be <= k or n_samples-1
-        assert len(n) <= model.k
-
-
-def test_recommend_returns_top_n(item_ids, small_user_item_matrix):
-    model = CollaborativeModel(
-        ids=item_ids,
-        user_item_matrix=small_user_item_matrix,
-        collab_method=CollabMethod.ITEM,
-        k=2
-    )
-
-    top_recs = model.recommend(item_ids[0], top_n=1)
-    assert isinstance(top_recs, list)
-    assert len(top_recs) == 1
-    assert isinstance(top_recs[0], tuple)
-    assert isinstance(top_recs[0][1], float)
+@pytest.fixture
+def mock_user_collaborative_model():
+    # small FAISS index with 2 users, embedding_dim=3
+    user_embeddings = np.array([
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0]
+    ], dtype=np.float32)
+    faiss.normalize_L2(user_embeddings)
+    
+    index = faiss.IndexFlatIP(3)  # inner product = cosine for normalized vectors
+    index.add(user_embeddings)
+    
+    # user-item matrix: 2 users x 3 items
+    user_item_matrix = csr_matrix([
+        [5, 0, 3],
+        [0, 4, 1]
+    ], dtype=np.float32)
+    
+    # item embeddings: 3 items x 3 dims
+    item_embeddings = np.array([
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1]
+    ], dtype=np.float32)
+    
+    return UserCollaborativeModel(index, user_item_matrix, item_embeddings)
 
 
-def test_recommend_top_n_greater_than_neighbors(item_ids, small_user_item_matrix):
-    model = CollaborativeModel(
-        ids=item_ids,
-        user_item_matrix=small_user_item_matrix,
-        collab_method=CollabMethod.ITEM,
-        k=len(item_ids) - 1
-    )
+def test_user_recommend_basic(mock_user_collaborative_model: UserCollaborativeModel):
+    # Ratings: user rated item 0
+    ratings = {0: 5.0}
+    top_n = 2
+    k_similar_users = 2
+    
+    res = mock_user_collaborative_model.recommend(ratings, top_n, k_similar_users)
+    
+    # Should return tuples
+    for r in res:
+        assert isinstance(r, tuple)
+        assert isinstance(r[0], int)
+        assert isinstance(r[1], float)
+    
+    # Already rated item 0 should not appear
+    item_ids = [i for i, _ in res]
+    assert 0 not in item_ids
 
-    recs = model.recommend(item_ids[0], top_n=5)
-    # Should return all available neighbors (n_samples - 1)
-    assert len(recs) == len(item_ids) - 1
+
+def test_user_recommend_top_n_exceeds(mock_user_collaborative_model: UserCollaborativeModel):
+    ratings = {0: 5.0}
+    res = mock_user_collaborative_model.recommend(ratings, top_n=10, k_similar_users=2)
+    # Should not exceed number of items minus already rated
+    assert len(res) <= mock_user_collaborative_model.num_items - len(ratings)
 
 
-def test_recommend_raises_for_unknown_id(item_ids, small_user_item_matrix):
-    model = CollaborativeModel(
-        ids=item_ids,
-        user_item_matrix=small_user_item_matrix,
-        collab_method=CollabMethod.ITEM,
-        k=2
-    )
-
-    with pytest.raises(ValueError):
-        model.recommend(999, top_n=1)
+def test_user_recommend_no_ratings(mock_user_collaborative_model: UserCollaborativeModel):
+    # User hasn't rated anything
+    ratings = {}
+    res = mock_user_collaborative_model.recommend(ratings, top_n=2, k_similar_users=2)
+    # Should still return top items
+    assert len(res) <= mock_user_collaborative_model.num_items

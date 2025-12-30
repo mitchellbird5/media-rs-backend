@@ -1,20 +1,20 @@
 from pathlib import Path
 from scipy.sparse import save_npz
 
-from media_rs.training.build.load_data import load_all_data
-from media_rs.training.build.build_content_features import build_content_column
-from media_rs.training.build.build_user_item_matrix import build_user_item_matrix
+from media_rs.utils.movies.load_movie_data import load_all_movie_data
+from media_rs.utils.movies.build_content_features import build_content_column
+from media_rs.utils.movies.build_user_item_matrix import build_user_item_matrix
 from media_rs.training.build.compute_embeddings import compute_item_and_user_embeddings
 from media_rs.training.build.build_topk_graphs import build_item_cf_topk, build_topk_content
 from media_rs.training.build.build_faiss_indices import build_faiss_indices
-from media_rs.training.build.load_data import save_pickle, save_numpy
+from media_rs.utils.load_data import save_pickle, save_numpy
 from media_rs.training.features.faiss import save_faiss_index
 
 save_dir = Path("media_rs/serving/artifacts/")
 file_dir = Path("data/movies/raw/ml-latest/")
 
 # Load data
-movies, ratings, tags = load_all_data(file_dir)
+movies, ratings, tags = load_all_movie_data(file_dir)
 
 # Build content column
 movies = build_content_column(movies)

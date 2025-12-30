@@ -3,7 +3,6 @@ from typing import List
 from scipy.sparse import csr_matrix
 
 from media_rs.training.features.embeddings import (
-    compute_item_embeddings, 
     compute_user_embeddings,
     compute_sbert_embeddings
 )

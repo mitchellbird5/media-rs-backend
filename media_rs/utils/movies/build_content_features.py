@@ -1,5 +1,4 @@
 import pandas as pd
-from typing import Tuple
 
 def build_content_column(movies: pd.DataFrame) -> pd.DataFrame:
     """
