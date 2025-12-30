@@ -1,9 +1,17 @@
-import pandas as pd
 import numpy as np
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
-from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
+
 from typing import List, Dict, Tuple
+
+def compute_sbert_embeddings(
+    item_texts: List[str]
+) -> Tuple[SentenceTransformer, np.ndarray]:
+    sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
+    return sbert_model, sbert_model.encode(item_texts, convert_to_numpy=True, normalize_embeddings=True)
+    
 
 def compute_item_embeddings(
     item_texts: List[str],

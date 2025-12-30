@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from media_rs.models.content import ContentModel
+from media_rs.models.content import ContentSimilarityModel
 
 @pytest.fixture
 def sample_data():
@@ -17,7 +17,7 @@ def sample_data():
 
 def test_initialization(sample_data):
     ids, features = sample_data
-    model = ContentModel(ids, features, k=2)
+    model = ContentSimilarityModel(ids, features, k=2)
 
     # Check attributes
     assert model.ids == ids
@@ -30,7 +30,7 @@ def test_initialization(sample_data):
 
 def test_tfidf_matrix_property(sample_data):
     ids, features = sample_data
-    model = ContentModel(ids, features)
+    model = ContentSimilarityModel(ids, features)
 
     tfidf1 = model.tfidf_matrix
     tfidf2 = model.tfidf_matrix  # Should return cached
@@ -46,7 +46,7 @@ def test_tfidf_matrix_property(sample_data):
 
 def test_neighbors_property(sample_data):
     ids, features = sample_data
-    model = ContentModel(ids, features, k=2)
+    model = ContentSimilarityModel(ids, features, k=2)
 
     neighbors = model.neighbors
 
@@ -64,7 +64,7 @@ def test_neighbors_property(sample_data):
 
 def test_recommend_returns_top_n(sample_data):
     ids, features = sample_data
-    model = ContentModel(ids, features, k=2)
+    model = ContentSimilarityModel(ids, features, k=2)
 
     top_recs = model.recommend(1, top_n=1)
     assert isinstance(top_recs, list)
@@ -75,7 +75,7 @@ def test_recommend_returns_top_n(sample_data):
 
 def test_recommend_with_top_n_greater_than_neighbors(sample_data):
     ids, features = sample_data
-    model = ContentModel(ids, features, k=1)
+    model = ContentSimilarityModel(ids, features, k=1)
 
     # There is only 1 neighbor
     recs = model.recommend(1, top_n=5)
@@ -84,7 +84,7 @@ def test_recommend_with_top_n_greater_than_neighbors(sample_data):
 
 def test_recommend_raises_for_unknown_id(sample_data):
     ids, features = sample_data
-    model = ContentModel(ids, features)
+    model = ContentSimilarityModel(ids, features)
 
     with pytest.raises(ValueError):
         model.recommend(999, top_n=1)
@@ -93,7 +93,7 @@ def test_recommend_raises_for_unknown_id(sample_data):
 def test_small_dataset_k_larger_than_items():
     ids = [1, 2]
     features = ["apple", "banana"]
-    model = ContentModel(ids, features, k=10)
+    model = ContentSimilarityModel(ids, features, k=10)
 
     # Should still work, neighbors length capped at n_samples - 1
     neighbors = model.neighbors
@@ -103,7 +103,7 @@ def test_small_dataset_k_larger_than_items():
 
 def test_neighbors_are_consistent(sample_data):
     ids, features = sample_data
-    model = ContentModel(ids, features)
+    model = ContentSimilarityModel(ids, features)
 
     neighbors_first = model.neighbors
     neighbors_second = model.neighbors  # Should use cache

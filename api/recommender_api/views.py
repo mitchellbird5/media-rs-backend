@@ -10,7 +10,7 @@ from api.recommender_api.serializers import (
 )
 from api.recommender_api.services.content_services import (
     get_content_recommendations,
-    get_content_recommendations_from_description
+    get_content_recommendations_from_description,
 )
 from api.recommender_api.services.collab_services import (
     get_item_cf_recommendations,
@@ -60,7 +60,6 @@ class ContentDescriptionRecommendationAPI(APIView):
         recs = get_content_recommendations_from_description(description, top_n)
 
         return Response(recs)
-
 
 # -----------------------------
 # Item CF

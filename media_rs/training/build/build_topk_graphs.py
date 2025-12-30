@@ -76,6 +76,6 @@ def build_topk_content(
     # Build mapping: item_idx -> top_k item_idx
     topk_content = {}
     for i, neighbors in enumerate(indices):
-        topk_content[i] = (neighbors[1:], distances[i][1:])  # skip itself
+        topk_content[i] = [(n, d) for n, d in zip(neighbors[1:], distances[i][1:])]  # skip self
     
     return topk_content

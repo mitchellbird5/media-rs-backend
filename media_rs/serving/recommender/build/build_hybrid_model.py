@@ -6,7 +6,7 @@ from media_rs.serving.recommender.build.build_collab_model import (
     get_user_cf_model, 
     get_item_cf_model
 )
-from media_rs.serving.recommender.build.build_content_model import get_content_model
+from media_rs.serving.recommender.build.build_content_model import get_content_similarity_model
 
 def get_hybrid_model(
     item_index: ItemIndex,
@@ -23,7 +23,7 @@ def get_hybrid_model(
         HybridModel: Hybrid filter model
     """
     
-    content_model = get_content_model(item_index)
+    content_model = get_content_similarity_model(item_index)
     item_cf_model = get_item_cf_model(item_index)
     user_cf_model = get_user_cf_model()
     
