@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from media_rs.models.hybrid import HybridModel
-from media_rs.models.content import ContentModel
+from media_rs.models.content import ContentSimilarityModel
 from media_rs.models.collab import CollaborativeModel
 from media_rs.rs_types.model import CollabMethod
 
@@ -15,7 +15,7 @@ def sample_content_model():
         "apple orange banana"
     ]
     # k=2 for small test
-    return ContentModel(ids=ids, features=features, k=2)
+    return ContentSimilarityModel(ids=ids, features=features, k=2)
 
 
 @pytest.fixture

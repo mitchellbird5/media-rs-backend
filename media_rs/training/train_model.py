@@ -19,6 +19,8 @@ movies, ratings, tags = load_all_data(file_dir)
 # Build content column
 movies = build_content_column(movies)
 
+content = movies["content"].values
+
 # -----------------------------
 # Build direct index → title mapping
 # -----------------------------
@@ -37,6 +39,7 @@ item_index = {
 
     # reverse
     "movieId_to_idx": movieId_to_idx,
+    
     "title_to_idx": title_to_idx,
 }
 
@@ -56,7 +59,11 @@ user_index = {
 # -----------------------------
 # Compute embeddings
 # -----------------------------
-item_embeddings, user_embeddings, vectorizer, svd = compute_item_and_user_embeddings(movies, user_item_matrix)
+(
+    item_embeddings, 
+    sbert_model,
+    user_embeddings, 
+) = compute_item_and_user_embeddings(content, user_item_matrix)
 
 # -----------------------------
 # Build top-k graphs
@@ -72,17 +79,19 @@ faiss_index_item, faiss_index_users = build_faiss_indices(item_embeddings, user_
 # -----------------------------
 # Save artifacts
 # -----------------------------
+
+
 save_pickle(item_index, save_dir.joinpath("item_index.pkl"))
 save_pickle(user_index, save_dir.joinpath("user_index.pkl"))
 
 save_numpy(item_embeddings, save_dir.joinpath("movies_item_embeddings.npy"))
 save_numpy(user_embeddings, save_dir.joinpath("movies_user_embeddings.npy"))
 
+sbert_model.save(str(save_dir.joinpath("movie_sbert_model")))
+
 save_pickle(topk_content, save_dir.joinpath("movies_item_topk_content.pkl"))
 save_pickle(topk_cf, save_dir.joinpath("movies_item_topk_cf.pkl"))
+
 save_npz(save_dir.joinpath("user_item_matrix.npz"), user_item_matrix)
 
 save_faiss_index(faiss_index_users, str(save_dir.joinpath("faiss_index_users.index")))
-
-save_pickle(vectorizer, save_dir.joinpath("movies_vectorizer.pkl"))
-save_pickle(svd, save_dir.joinpath("movies_svd.pkl"))
