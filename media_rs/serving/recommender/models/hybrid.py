@@ -5,7 +5,7 @@ import numpy as np
 from typing import List, Dict
 from media_rs.rs_types.model import ContentSimilarity
 
-from media_rs.serving.recommender.models.content import ContentModel
+from media_rs.serving.recommender.models.content import ContentSimilarityModel
 from media_rs.serving.recommender.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
 
 class HybridModel:
@@ -15,7 +15,7 @@ class HybridModel:
     """
     def __init__(
         self,
-        content_model: ContentModel,
+        content_model: ContentSimilarityModel,
         item_collab_model: ItemItemCollaborativeModel,
         user_collab_model: UserCollaborativeModel,
         alpha: float,
@@ -24,7 +24,7 @@ class HybridModel:
         """_summary_
 
         Args:
-            content_model (ContentModel): 
+            content_model (ContentSimilarityModel): 
                 Recommendation system model based on content similarity.
             
             item_collab_model (ItemItemCollaborativeModel): 

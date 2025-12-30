@@ -1,14 +1,15 @@
-# src/models/content.py
 import numpy as np
 
 from typing import List, Dict, Tuple, Optional
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
+from sentence_transformers import SentenceTransformer
 
 from media_rs.rs_types.model import IdType, ContentSimilarity
 
 
-class ContentModel:
+class ContentSimilarityModel:
     """
     Recommendation system model based on content similarity.
     """
@@ -16,8 +17,7 @@ class ContentModel:
         self,
         topk_graph:  Dict[int, List[Tuple[int, float]]],
         embeddings: np.ndarray,
-        vectorizer: TfidfVectorizer,
-        svd: TruncatedSVD
+        transformer: SentenceTransformer,
     ):
         """
         Initialisation
@@ -30,19 +30,13 @@ class ContentModel:
                 Item embedding matrix of shape (num_items, embedding_dim),
                 where each row represents an item in a latent vector space.
                 
-            vectorizer (TfidfVectorizer): 
-                Fitted TF-IDF vectorizer used to convert raw text into a 
-                sparse term-frequency representation.
-            
-            svd (TruncatedSVD): 
-                Fitted dimensionality-reduction model that projects TF-IDF vectors into a
-                dense latent embedding space.
+            transformer (SentenceTransformer): 
+                Fitted SBERT sentence transformer.
         """
         
         self.topk_graph = topk_graph
         self.embeddings = embeddings
-        self.vectorizer = vectorizer
-        self.svd = svd
+        self.transformer = transformer
 
     def recommend(
         self, 
@@ -63,17 +57,17 @@ class ContentModel:
         """
         
         return self.topk_graph[item_id][:top_n]
-
-    def recommend_from_text(
+    
+    def recommend_from_description(
         self, 
-        text: str, 
+        description: str, 
         top_n: int
     ) -> List[ContentSimilarity]:
         """
-        Recommend n most similar items to text description
+        Recommend n most similar items for item_id
 
         Args:
-            text (str): Description used to compare
+            description (IdType): Description to compare against
             top_n (int): Number of results to return
 
         Returns:
@@ -81,16 +75,14 @@ class ContentModel:
                 List of results.
                 Tuple of ID of item and similarity score for each result in list
         """
-
-        vec = self.vectorizer.transform([text])
-        emb = self.svd.transform(vec).astype("float32")
-
-        sims = emb @ self.embeddings.T
-
+        # Compute SBERT embedding
+        emb = self.transformer.encode([description], convert_to_numpy=True, normalize_embeddings=True)
+        
+        # Compute cosine similarity
+        sims = emb @ self.embeddings.T  # (1, num_items)
         sims = sims.ravel()
-
+        
         # Top-N indices
         top_indices = np.argsort(-sims)[:top_n]
-
-        # Return (index, score)
+        
         return [(int(i), float(sims[i])) for i in top_indices]
