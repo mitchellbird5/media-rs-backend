@@ -3,7 +3,34 @@ import faiss
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import csr_matrix
 
-def build_item_cf_topk(user_item_matrix: csr_matrix, k=100, batch_size=1000):
+from typing import List
+
+from media_rs.rs_types.model import ContentSimilarity
+
+def build_item_cf_topk(
+    user_item_matrix: csr_matrix, 
+    k: int=100, 
+    batch_size: int=1000
+) -> List[ContentSimilarity]:
+    """
+    Builds similarity graph of nearest K users using cosine similarity.
+
+    Args:
+        user_item_matrix (csr_matrix): 
+            Sparse user–item interaction matrix of shape
+            (num_users, num_items), where rows correspond to users
+            and columns correspond to items.
+        
+        k (int, optional): 
+            Number of nearest users to graph. Defaults to 100.
+        
+        batch_size (int, optional): 
+            Size of batch to compute at any one time. Defaults to 1000.
+
+    Returns:
+        List[ContentSimilarity]: Top K nearest neighbour graph
+    """
+    
     num_items = user_item_matrix.shape[1]
     topk_cf = {}
 
@@ -17,7 +44,24 @@ def build_item_cf_topk(user_item_matrix: csr_matrix, k=100, batch_size=1000):
     return topk_cf
 
 
-def build_topk_content(item_embeddings, top_k=100):
+def build_topk_content(
+    item_embeddings:np.ndarray, 
+    top_k: int=100
+) -> List[ContentSimilarity]:
+    """
+    Builds similarity graph of nearest K users using FAISS.
+
+    Args:
+        item_embeddings (np.ndarray): 
+            Item embedding matrix of shape (num_items, embedding_dim),
+            where each row represents an item in a latent vector space.
+        
+        top_k (int, optional): Number of nearest users to graph. Defaults to 100.
+
+    Returns:
+        List[ContentSimilarity]: Top K nearest neighbour graph
+    """
+    
     # Normalize embeddings for cosine similarity
     faiss.normalize_L2(item_embeddings)
     
@@ -32,6 +76,6 @@ def build_topk_content(item_embeddings, top_k=100):
     # Build mapping: item_idx -> top_k item_idx
     topk_content = {}
     for i, neighbors in enumerate(indices):
-        topk_content[i] = neighbors[1:]  # skip itself
+        topk_content[i] = (neighbors[1:], distances[i][1:])  # skip itself
     
     return topk_content

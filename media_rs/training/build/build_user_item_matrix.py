@@ -9,17 +9,31 @@ def build_user_item_matrix(
     title_to_idx: Dict[str, int]
 ) -> Tuple[csr_matrix, Dict[int,int], Dict[int,int]]:
     """
-    Build a user-item sparse matrix using movie titles as columns.
+    Build user-item sparse matrix from movies and ratings
 
     Args:
-        ratings: DataFrame with columns ["userId", "movieId", "rating"]
-        movies: DataFrame with columns ["movieId", "title"]
-        title_to_idx: Dict mapping normalized movie titles to column indices
+        ratings (pd.DataFrame): 
+            Dataframe of user ratings of movies
+        
+        movies (pd.DataFrame): 
+            Dataframe of movie title, generes and tags
+        
+        title_to_idx (Dict[str, int]):
+            Mapping of movie title to index position
+
+    Raises:
+        ValueError: If ratings empty
+        ValueError: If number of columns exceeds matrix width
 
     Returns:
-        user_item_matrix: CSR sparse matrix of shape (num_users, num_movies)
-        userId_to_idx: Dict mapping userId -> row index
-        idx_to_userId: Dict mapping row index -> userId
+        Tuple[csr_matrix, Dict[int,int], Dict[int,int]]: 
+            1. Sparse user–item interaction matrix of shape
+               (num_users, num_items), where rows correspond to users
+               and columns correspond to items.
+            
+            2. userId to index position mapping
+            
+            3. Index position to userID mapping
     """
 
     # Normalize movie titles

@@ -14,6 +14,15 @@ def get_hybrid_model(
     beta: float
 ) -> HybridModel:
     
+    """Retrieves hybrid filter model.
+
+    Args:
+        item_index (ItemIndex): ItemIndex object of index data.
+
+    Returns:
+        HybridModel: Hybrid filter model
+    """
+    
     content_model = get_content_model(item_index)
     item_cf_model = get_item_cf_model(item_index)
     user_cf_model = get_user_cf_model()

@@ -1,6 +1,7 @@
 from typing import List, Dict
 
 from media_rs.utils.item_index import ItemIndex
+from media_rs.rs_types.model import ContentSimilarity
 from media_rs.serving.recommender.build.build_collab_model import (
     get_item_cf_model,
     get_user_cf_model
@@ -9,7 +10,7 @@ from media_rs.serving.recommender.build.build_collab_model import (
 def get_item_cf_recommendations(
     movie_title: str,
     top_n: int = 10
-) -> List[str]:
+) -> List[ContentSimilarity]:
     
     item_idx = ItemIndex("media_rs/serving/artifacts/item_index.pkl")
     
@@ -22,7 +23,7 @@ def get_user_cf_recommendations(
     ratings: Dict[str, float],
     top_n: int,
     k_similar_users: int
-) -> List[str]:
+) -> List[ContentSimilarity]:
     
     item_idx = ItemIndex("media_rs/serving/artifacts/item_index.pkl")
     

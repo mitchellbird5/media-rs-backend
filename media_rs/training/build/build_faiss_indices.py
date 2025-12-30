@@ -1,7 +1,25 @@
 import faiss
+import numpy as np
+
+from typing import Tuple
+
 from media_rs.training.features.faiss import build_faiss_index
 
-def build_faiss_indices(item_embeddings, user_embeddings):
+def build_faiss_indices(
+    item_embeddings: np.ndarray, 
+    user_embeddings: np.ndarray
+) -> Tuple[faiss.Index, faiss.Index]:
+    """
+    Returns FAISS indices of item and user embeddings
+
+    Args:
+        item_embeddings (np.ndarray): Item embeddings
+        user_embeddings (np.ndarray): User embeddings
+
+    Returns:
+        _type_: _description_
+    """
+    
     faiss_index_content = build_faiss_index(item_embeddings, metric="cosine")
 
     faiss.normalize_L2(user_embeddings)
