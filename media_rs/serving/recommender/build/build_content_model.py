@@ -6,7 +6,13 @@ from pathlib import Path
 from media_rs.serving.recommender.models.content import ContentModel
 from media_rs.utils.item_index import ItemIndex
 
-def get_content_model(item_index: ItemIndex) -> ContentModel:
+def get_content_model() -> ContentModel:
+    """Retrieves content filter model.
+
+    Returns:
+        ContentModel: Content filter model
+    """
+    
     wdir = Path("media_rs/serving/artifacts")
 
     # Preload metadata for faster API responses
@@ -24,7 +30,6 @@ def get_content_model(item_index: ItemIndex) -> ContentModel:
 
     # Initialize content model
     return ContentModel(
-        ids=item_index.ids,
         topk_graph=topk_graph_content,
         embeddings=item_embeddings,
         vectorizer=vectorizer,

@@ -5,6 +5,7 @@ from typing import Dict, List
 
 from media_rs.utils.item_index import ItemIndex
 from media_rs.serving.recommender.build.build_hybrid_model import get_hybrid_model
+from media_rs.rs_types.model import ContentSimilarity
 
 def get_hybrid_recommendations(
     movie_title: str,
@@ -13,7 +14,7 @@ def get_hybrid_recommendations(
     beta: float,
     top_n: int,
     k_similar_users: int
-) -> List[str]:
+) -> List[ContentSimilarity]:
     
     wdir = Path("media_rs/serving/artifacts")
     

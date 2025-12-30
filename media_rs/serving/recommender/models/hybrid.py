@@ -9,14 +9,37 @@ from media_rs.serving.recommender.models.content import ContentModel
 from media_rs.serving.recommender.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
 
 class HybridModel:
+    """
+    Recommendation system model based on a hybrid of item-item and 
+    user-user collaborative filtering, and content similarity.
+    """
     def __init__(
         self,
         content_model: ContentModel,
         item_collab_model: ItemItemCollaborativeModel,
         user_collab_model: UserCollaborativeModel,
-        alpha: float = 0.5,   # weight for content
-        beta: float = 0.3     # weight for item CF
+        alpha: float,
+        beta: float
     ):
+        """_summary_
+
+        Args:
+            content_model (ContentModel): 
+                Recommendation system model based on content similarity.
+            
+            item_collab_model (ItemItemCollaborativeModel): 
+                Recommendation system model based on item-item collaborative filtering.
+            
+            user_collab_model (UserCollaborativeModel): 
+                Recommendation system model based on user-user collaborative filtering.
+            
+            alpha (float): 
+                Weighting of content similarity score.
+                
+            beta (float): 
+                Weighting of item collaborative filtering score.
+        """
+        
         self.content_model = content_model
         self.item_collab_model = item_collab_model
         self.user_collab_model = user_collab_model
@@ -29,12 +52,36 @@ class HybridModel:
         item_idx: int,
         new_user_ratings: Dict[int, float],
         item_embeddings: np.ndarray,
-        k_similar_users: int = 50,
-        top_n: int = 10
+        k_similar_users: int,
+        top_n: int
     ) -> List[ContentSimilarity]:
         """
-        Recommend for a new user given a ratings dict {item_idx: rating}
+        Recommend n most similar items
+
+        Args:
+            item_idx (int): 
+                ID of item to compare in content similarity model
+            
+            new_user_ratings (Dict[int, float]): 
+                Ratings of movies to use in 
+                user-user collaborative filtering.
+            
+            item_embeddings (np.ndarray): 
+                Item embedding matrix of shape (num_items, embedding_dim),
+                where each row represents an item in a latent vector space.
+            
+            k_similar_users (int, optional):
+                Number of similar users to use in computation
+            
+            top_n (int, optional): 
+                Number of results to return
+
+        Returns:
+            List[ContentSimilarity]: 
+                List of results.
+                Tuple of index of item and similarity score for each result
         """
+        
         # 1. Content scores
         content_scores = dict(self.content_model.recommend(item_idx, top_n))
 

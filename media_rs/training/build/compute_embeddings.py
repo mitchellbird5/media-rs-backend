@@ -1,7 +1,14 @@
 import numpy as np
+import pandas as pd
+
+from scipy.sparse import csr_matrix
+
 from media_rs.training.features.embeddings import compute_item_embeddings, compute_user_embeddings
 
-def compute_item_and_user_embeddings(movies, user_item_matrix):
+def compute_item_and_user_embeddings(
+    movies: pd.DataFrame, 
+    user_item_matrix: csr_matrix
+):
     # Item embeddings
     item_embeddings, vectorizer, svd = compute_item_embeddings(movies["content"].values)
 
