@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from media_rs.serving.recommender.models.hybrid import HybridModel
 from media_rs.utils.item_index import ItemIndex
 from media_rs.serving.recommender.build.build_collab_model import (
