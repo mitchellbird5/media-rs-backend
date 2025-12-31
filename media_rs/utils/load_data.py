@@ -1,9 +1,7 @@
 import pandas as pd
 import numpy as np
 import pickle
-
-from pathlib import Path
-from typing import Tuple
+import faiss
 
 def load_dataframe(csv_path: str) -> pd.DataFrame:
     """
@@ -31,3 +29,9 @@ def save_metadata(df: pd.DataFrame, path: str):
 
 def load_metadata(path: str) -> pd.DataFrame:
     return pd.read_parquet(path)
+
+def save_faiss_index(index: faiss.Index, path: str):
+    faiss.write_index(index, path)
+
+def load_faiss_index(path: str) -> faiss.Index:
+    return faiss.read_index(path)

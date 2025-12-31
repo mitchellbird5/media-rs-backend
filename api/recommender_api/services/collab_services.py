@@ -1,11 +1,12 @@
-from typing import List, Dict
-
 from media_rs.utils.item_index import ItemIndex
 from media_rs.rs_types.model import ContentSimilarity
 from media_rs.serving.recommender.build.build_collab_model import (
     get_item_cf_model,
     get_user_cf_model
 )
+from media_rs.utils.movies.movie_data_cache import MOVIE_DATA_CACHE
+
+from typing import List, Dict
 
 def get_item_cf_recommendations(
     movie_title: str,
@@ -14,7 +15,7 @@ def get_item_cf_recommendations(
     
     item_idx = ItemIndex("media_rs/serving/artifacts/item_index.pkl")
     
-    rs = get_item_cf_model()
+    rs = get_item_cf_model(MOVIE_DATA_CACHE)
     
     recommendations = rs.recommend(item_idx.title_to_idx[movie_title], top_n)
     return [item_idx.idx_to_title[r[0]] for r in recommendations]
@@ -33,7 +34,7 @@ def get_user_cf_recommendations(
         if title in item_idx.title_to_idx
     }
     
-    rs = get_user_cf_model()
+    rs = get_user_cf_model(MOVIE_DATA_CACHE)
     
     recommendations = rs.recommend(
         index_ratings, 
