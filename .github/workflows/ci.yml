@@ -40,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --with training
+          poetry install
 
       # ignore e2e tests so data isn't hosted on git
       - name: Run tests
