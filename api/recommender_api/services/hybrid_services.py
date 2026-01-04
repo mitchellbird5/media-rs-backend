@@ -7,6 +7,10 @@ from media_rs.utils.item_index import ItemIndex
 from media_rs.serving.recommender.build.build_hybrid_model import get_hybrid_model
 from media_rs.rs_types.model import ContentSimilarity
 
+from media_rs.utils.movies.movie_data_cache import get_movie_data_cache
+
+cache = get_movie_data_cache()
+
 def get_hybrid_recommendations(
     movie_title: str,
     ratings: Dict[str, float],
@@ -15,11 +19,9 @@ def get_hybrid_recommendations(
     top_n: int,
     k_similar_users: int
 ) -> List[ContentSimilarity]:
-    
-    wdir = Path("media_rs/serving/artifacts")
-    
-    item_idx = ItemIndex(wdir.joinpath("item_index.pkl"))
-    item_embeddings = np.load(wdir.joinpath("movies_item_embeddings.npy"))
+
+    item_idx = ItemIndex(cache.get("item_index.pkl"))
+    item_embeddings = cache.load("movies_item_embeddings.npy")
     
     index_ratings = {
         item_idx.title_to_idx[title]: score
