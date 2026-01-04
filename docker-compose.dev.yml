@@ -1,7 +1,7 @@
 services:
   mediars-backend-dev:
-    container_name: mediars-backend-dev
-    image: mediars/backend-dev:latest
+    container_name: media-rs-backend-dev
+    image: media-rs/backend-dev:latest
     volumes:
       - .:/app
       - ./data/movies/raw/ml-latest/hf_cache:/root/.cache/huggingface
