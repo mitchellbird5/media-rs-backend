@@ -63,3 +63,30 @@ def test_hybrid_api_e2e(api_client: APIClient):
     data = response.json()
     assert isinstance(data, list)
     assert len(data)!=0
+    
+@pytest.mark.django_db
+def test_movie_search_view_e2e(api_client):
+    """
+    End-to-end test for MovieSearchView
+    - Inserts test movies
+    - Calls the API
+    - Checks response status and content
+    """
+
+    # Call the API endpoint
+    url = "/api/movies/search/"
+    response = api_client.get(url, {"query": "Toy Story"})
+
+    # Validate response status
+    assert response.status_code == 200
+
+    # Parse JSON
+    data = response.json()
+
+    # Check response is a list and has entries
+    assert isinstance(data, list)
+    assert len(data) != 0, "Expected at least one movie in the response"
+
+    # Check at least one title contains 'Toy Story'
+    titles = [movie["title"] for movie in data]
+    assert any("Toy Story" in title for title in titles), "Expected 'Toy Story' in results"
