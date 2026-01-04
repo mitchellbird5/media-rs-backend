@@ -38,11 +38,9 @@ jobs:
           version: latest
           virtualenvs-in-project: true
 
-      - name: Install dependencies
-        run: |
-          poetry install
+      - name: Start CI containers
+        run: docker compose -f docker-compose.dev.yml up -d --remove-orphans
 
-      # ignore e2e tests so data isn't hosted on git
       - name: Run tests
-        run: |
-          poetry run pytest
+        run: docker compose -f docker-compose.dev.yml exec -T media-rs-backend-dev poetry run pytest
+
