@@ -22,6 +22,8 @@ from api.recommender_api.services.hybrid_services import (
 )
 from api.recommender_api.services.database_query import MoviesService
 
+from media_rs.utils.session import get_or_create_session_id
+
 
 # -----------------------------
 # Content-based
@@ -145,11 +147,24 @@ class HybridRecommendationAPI(APIView):
     
 class MovieSearchView(APIView):
     def get(self, request):
-        # Parse query parameter
         query = request.GET.get("query", "").strip()
 
+        response = JsonResponse({}, safe=False)
+
         try:
-            results = MoviesService.search_movies(query)
-            return JsonResponse(results, safe=False)
+            session_id = get_or_create_session_id(request, response)
+
+            results = MoviesService.search_movies(
+                query=query,
+                user_key=f"session:{session_id}"
+            )
+
+            response.content = JsonResponse(results, safe=False).content
+            return response
+
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+            response.status_code = 429 if "Rate limit" in str(e) else 500
+            response.content = JsonResponse(
+                {"error": str(e)}
+            ).content
+            return response
