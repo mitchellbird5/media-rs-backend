@@ -1,5 +1,5 @@
 services:
-  mediars-backend-dev:
+  media-rs-backend-dev:
     container_name: media-rs-backend-dev
     image: media-rs/backend-dev:latest
     volumes:
