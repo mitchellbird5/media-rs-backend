@@ -18,6 +18,7 @@ jobs:
       HF_REPO_ID: ${{ secrets.HF_REPO_ID }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_TABLE: ${{ secrets.SUPABASE_TABLE }}
 
     strategy:
       matrix:
