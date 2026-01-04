@@ -1,11 +1,8 @@
 import pickle
-from pathlib import Path
-from typing import Dict
+from typing import Dict, Any
 
 class ItemIndex:
-    def __init__(self, path: Path):
-        data = pickle.load(open(path, "rb"))
-
+    def __init__(self, data: Dict[str, Any]):
         self.num_items: int = data["num_items"]
 
         self.idx_to_movieId: Dict[int, int] = data["idx_to_movieId"]
