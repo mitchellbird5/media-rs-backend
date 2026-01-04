@@ -5,7 +5,13 @@ from typing import List, Dict, Any
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY") 
 SUPABASE_TABLE = os.getenv("SUPABASE_TABLE")
-supabase: Client = create_client(f"{SUPABASE_URL}", f"{SUPABASE_KEY}")
+
+
+try:
+    client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    print("Supabase ping successful")
+except Exception as e:
+    print("Supabase ping failed:", e)
 
 
 class MoviesService:
@@ -18,7 +24,7 @@ class MoviesService:
             return []
 
         try: 
-            response = supabase.table(f"{SUPABASE_TABLE}") \
+            response = client.table(f"{SUPABASE_TABLE}") \
                 .select("movieId, title") \
                 .ilike("title", f"%{query}%") \
                 .limit(limit) \
@@ -27,5 +33,3 @@ class MoviesService:
         
         except:
             raise Exception(f"Supabase error")
-
-        
