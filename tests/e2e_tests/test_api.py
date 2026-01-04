@@ -65,7 +65,7 @@ def test_hybrid_api_e2e(api_client: APIClient):
     assert len(data)!=0
     
 @pytest.mark.django_db
-def test_movie_search_view_e2e(api_client):
+def test_movie_search_api_e2e(api_client):
     """
     End-to-end test for MovieSearchView
     - Inserts test movies
