@@ -18,7 +18,7 @@ class MoviesService:
             return []
 
         try: 
-            response = supabase.table(SUPABASE_TABLE) \
+            response = supabase.table(f"{SUPABASE_TABLE}") \
                 .select("movieId, title") \
                 .ilike("title", f"%{query}%") \
                 .limit(limit) \
