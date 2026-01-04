@@ -43,5 +43,5 @@ jobs:
         run: docker compose -f docker-compose.dev.yml up -d --remove-orphans
 
       - name: Run tests
-        run: docker compose -f docker-compose.dev.yml exec -T media-rs-backend-dev poetry run pytest
+        run: docker compose -f docker-compose.dev.yml run --rm media-rs-backend-dev poetry run pytest
 
