@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.http import JsonResponse
 
 from api.recommender_api.serializers import (
     ContentRecommendationInputSerializer,
@@ -19,6 +20,7 @@ from api.recommender_api.services.collab_services import (
 from api.recommender_api.services.hybrid_services import (
     get_hybrid_recommendations
 )
+from api.recommender_api.services.database_query import MoviesService
 
 
 # -----------------------------
@@ -140,3 +142,14 @@ class HybridRecommendationAPI(APIView):
             )
 
         return Response(recs)
+    
+class MovieSearchView(APIView):
+    def get(self, request):
+        # Parse query parameter
+        query = request.GET.get("query", "").strip()
+
+        try:
+            results = MoviesService.search_movies(query)
+            return JsonResponse(results, safe=False)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
