@@ -14,8 +14,7 @@
     "ms-python.vscode-pylance",
     "ms-python.black-formatter",
     "ms-python.isort",
-    "ms-python.debugpy",
-    "littlefoxteam.vscode-python-test-adapter"
+    "ms-python.debugpy"
   ],
   "remoteUser": "root"
 }
