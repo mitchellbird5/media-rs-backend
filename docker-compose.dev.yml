@@ -12,8 +12,12 @@ services:
     expose:
       - 8000
       - 5678
-    env_file:
-      - .env
     environment:
       DJANGO_SETTINGS_MODULE: api.api_project.settings
       PYTHONUNBUFFERED: "1"
+
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      HF_TOKEN: ${HF_TOKEN}
+      HF_REPO_ID: ${HF_REPO_ID}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_KEY: ${SUPABASE_KEY}
