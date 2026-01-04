@@ -3,17 +3,17 @@ services:
     container_name: mediars-backend-dev
     image: mediars/backend-dev:latest
     volumes:
-      - ./media_rs:/app/media_rs
+      - .:/app
       - ./data/movies/raw/ml-latest/hf_cache:/root/.cache/huggingface
     build:
       context: .
       dockerfile: Dockerfile
       
     expose:
-      - 5000
+      - 8000
+      - 5678
     env_file:
       - .env
     environment:
-      PORT: 5000
-    entrypoint: /bin/bash
-    command: -c "set -e; /app/entrypoint.sh; tail -f /dev/null"
+      DJANGO_SETTINGS_MODULE: api.api_project.settings
+      PYTHONUNBUFFERED: "1"

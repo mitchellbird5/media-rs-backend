@@ -12,7 +12,7 @@ from pathlib import Path
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 HF_REPO = os.getenv("HF_REPO_ID")
-cache_folder = "data/movies/raw/ml-latest/hf_cache"
+CACHE_FOLDER = os.getenv("CACHE_FOLDER")
 
 if not HF_REPO:
     raise ValueError(f"Environment variable HF_REPO not defined.")
@@ -44,6 +44,7 @@ class MovieDataCache:
             cls._instance.repo_id = repo_id
             cls._instance.local_dir = Path(local_dir) if local_dir else None
             cls._instance._preload_files()
+            cls._instance._load_all_files()
         return cls._instance
 
     def _preload_files(self):
@@ -74,7 +75,7 @@ class MovieDataCache:
                             repo_type="dataset",
                             token=HF_TOKEN,
                             allow_patterns=[f + "/*"],
-                            cache_dir=cache_folder
+                            cache_dir=CACHE_FOLDER
                         )
                     )
                     # snapshot_download returns the root snapshot folder, append subfolder
@@ -85,7 +86,7 @@ class MovieDataCache:
                         filename=f, 
                         repo_type="dataset",
                         token=HF_TOKEN,
-                        cache_dir=cache_folder
+                        cache_dir=CACHE_FOLDER
                     ))
                     self.paths[f] = path
                     
@@ -93,13 +94,23 @@ class MovieDataCache:
                 
             print("All files cached!")
 
+    def _load_all_files(self):
+        """
+        Load all files into memory when the singleton is instantiated.
+        """
+        self.data = {}
+        print("Loading files into memory...")
+        for f in self.FILES_TO_DOWNLOAD:
+            self.data[f] = self._load_file(f)
+        print("All files loaded into memory!")
+
     def get_path(self, filename: str) -> Path:
         """
         Returns the path of a file (either local or cached from HF Hub)
         """
         return self.paths.get(filename)
     
-    def load(self, filename: str):
+    def _load_file(self, filename: str):
         """Load a file according to its type."""
         path = self.get_path(filename)
         if path is None:
@@ -120,4 +131,18 @@ class MovieDataCache:
             # fallback: return Path object
             return path
         
-MOVIE_DATA_CACHE = MovieDataCache(HF_REPO)
+    def get(self, filename: str):
+        """
+        Get the in-memory object for a file.
+        """
+        if filename not in self.data:
+            raise ValueError(f"{filename} not loaded in memory.")
+        return self.data[filename]
+
+_CACHE: MovieDataCache | None = None
+
+def get_movie_data_cache() -> MovieDataCache:
+    global _CACHE
+    if _CACHE is None:
+        _CACHE = MovieDataCache(repo_id=HF_REPO)
+    return _CACHE
