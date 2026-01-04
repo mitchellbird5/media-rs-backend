@@ -13,6 +13,12 @@ jobs:
     env:
       DJANGO_SETTINGS_MODULE: api.api_project.settings
 
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_REPO_ID: ${{ secrets.HF_REPO_ID }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
     strategy:
       matrix:
         python-version: [3.11]
