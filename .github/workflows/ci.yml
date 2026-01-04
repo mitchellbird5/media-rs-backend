@@ -10,6 +10,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      DJANGO_SETTINGS_MODULE: api.api_project.settings
+
     strategy:
       matrix:
         python-version: [3.11]
