@@ -3,7 +3,8 @@ from .views import (
     ContentRecommendationAPI, 
     ContentDescriptionRecommendationAPI,
     ItemCFRecommendationAPI,
-    UserCFRecommendationAPI
+    UserCFRecommendationAPI,
+    MovieSearchView
 )
 
 urlpatterns = [
@@ -32,4 +33,9 @@ urlpatterns = [
         UserCFRecommendationAPI.as_view(), 
         name="hybrid-recommend"
     ),
+    path(
+        "movies/search/",
+        MovieSearchView.as_view(), 
+        name='movie-search'
+    )
 ]
