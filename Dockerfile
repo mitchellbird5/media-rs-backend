@@ -37,4 +37,6 @@ COPY . .
 COPY pyproject.toml poetry.lock* README.md ./
 RUN poetry install --no-interaction --no-ansi --with dev
 
+ENTRYPOINT ["./entrypoint.sh"]
+
 CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "manage.py", "runserver", "0.0.0.0:8000", "--noreload"]
