@@ -1,7 +1,7 @@
 services:
-  media-rs-backend-dev:
-    container_name: media-rs-backend-dev
-    image: media-rs/backend-dev:latest
+  media-rs-backend-ci:
+    container_name: media-rs-backend-ci
+    image: media-rs/backend-ci:latest
     volumes:
       - .:/app
       - ./data/movies/raw/ml-latest/hf_cache:/root/.cache/huggingface
