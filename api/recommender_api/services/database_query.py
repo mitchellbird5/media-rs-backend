@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY") 
 SUPABASE_TABLE = os.getenv("SUPABASE_TABLE")
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(f"{SUPABASE_URL}", f"{SUPABASE_KEY}")
 
 
 class MoviesService:
