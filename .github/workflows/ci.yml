@@ -10,6 +10,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      DJANGO_SETTINGS_MODULE: api.api_project.settings
+
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_REPO_ID: ${{ secrets.HF_REPO_ID }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_TABLE: ${{ secrets.SUPABASE_TABLE }}
+
     strategy:
       matrix:
         python-version: [3.11]
@@ -29,11 +39,9 @@ jobs:
           version: latest
           virtualenvs-in-project: true
 
-      - name: Install dependencies
-        run: |
-          poetry install --with training
+      - name: Start CI containers
+        run: docker compose -f docker-compose.dev.yml up -d --remove-orphans
 
-      # ignore e2e tests so data isn't hosted on git
       - name: Run tests
-        run: |
-          poetry run pytest tests/unit_tests/
+        run: docker compose -f docker-compose.dev.yml run --rm media-rs-backend-dev poetry run pytest
+
