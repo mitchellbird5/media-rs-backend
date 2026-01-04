@@ -120,29 +120,3 @@ def query_faiss_topk(
         topk_dict[i] = neighbors
 
     return topk_dict
-
-# ----------------------------
-# 3. Save / Load FAISS index
-# ----------------------------
-def save_faiss_index(index: faiss.Index, path: str):
-    """
-    Saves FAISS index
-
-    Args:
-        index (faiss.Index): FAISS index
-        path (str): Path to save
-    """
-    
-    faiss.write_index(index, path)
-
-def load_faiss_index(path: str) -> faiss.Index:
-    """
-    Load FAISS index
-
-    Args:
-        path (str): Location of index file to load
-
-    Returns:
-        faiss.Index: FAISS index of the top-K most similar users
-    """
-    return faiss.read_index(path)

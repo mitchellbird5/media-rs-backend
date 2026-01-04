@@ -1,0 +1,9 @@
+media_rs/serving/artifacts/
+data/
+.env
+
+.vscode/
+
+venv/
+
+/**/*pycache*

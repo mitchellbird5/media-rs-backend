@@ -7,8 +7,7 @@ from media_rs.utils.movies.build_user_item_matrix import build_user_item_matrix
 from media_rs.training.build.compute_embeddings import compute_item_and_user_embeddings
 from media_rs.training.build.build_topk_graphs import build_item_cf_topk, build_topk_content
 from media_rs.training.build.build_faiss_indices import build_faiss_indices
-from media_rs.utils.load_data import save_pickle, save_numpy
-from media_rs.training.features.faiss import save_faiss_index
+from media_rs.utils.load_data import save_pickle, save_numpy, save_faiss_index
 
 save_dir = Path("media_rs/serving/artifacts/")
 file_dir = Path("data/movies/raw/ml-latest/")
