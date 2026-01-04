@@ -40,8 +40,12 @@ jobs:
           virtualenvs-in-project: true
 
       - name: Start CI containers
-        run: docker compose -f docker-compose.dev.yml up -d --remove-orphans
+        run: docker compose -f docker-compose.ci.yml up -d --remove-orphans
 
       - name: Run tests
-        run: docker compose -f docker-compose.dev.yml run --rm media-rs-backend-dev poetry run pytest
+        run: docker compose -f docker-compose.ci.yml run --rm media-rs-backend-ci poetry run pytest
+
+      - name: Tear down CI containers
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down -v
 
