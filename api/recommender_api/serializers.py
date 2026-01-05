@@ -38,11 +38,11 @@ class HybridInputSerializer(serializers.Serializer):
 
 class ContentRecommendationInputSerializer(serializers.Serializer):
     movie_title = serializers.CharField()
-    top_n = serializers.IntegerField(default=10, min_value=1)
+    top_n = serializers.IntegerField(default=10, min_value=1, max_value=100)
     
 class ContentDescriptionInputSerializer(serializers.Serializer):
     description = serializers.CharField()
-    top_n = serializers.IntegerField(default=10, min_value=1)
+    top_n = serializers.IntegerField(default=10, min_value=1, max_value=100)
 
 # -----------------------------
 # Output serializers
