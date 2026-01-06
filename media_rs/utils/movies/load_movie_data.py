@@ -22,9 +22,10 @@ def load_all_movie_data(
     movies = load_dataframe(wdir.joinpath("movies.csv"))
     ratings = load_dataframe(wdir.joinpath("ratings.csv"))
     tags = load_dataframe(wdir.joinpath("tags.csv"))
+    links = load_dataframe(wdir.joinpath("links.csv"))
 
     movies = add_tags_to_movies(movies, tags)
-    return movies, ratings, tags
+    return movies, ratings, tags, links
 
 def add_tags_to_movies(
     movies: pd.DataFrame, 
