@@ -1,10 +1,13 @@
-name: Initialize Hugging Face Cache
+name: Python CI
 
 on:
-  workflow_dispatch:  # manually trigger once
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  init-cache:
+  test:
     runs-on: ubuntu-latest
 
     env:
