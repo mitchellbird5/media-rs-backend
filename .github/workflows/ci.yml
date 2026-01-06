@@ -12,10 +12,10 @@ jobs:
 
     env:
       DJANGO_SETTINGS_MODULE: api.api_project.settings
-
-      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       HF_REPO_ID: ${{ secrets.HF_REPO_ID }}
+      CACHE_FOLDER: ${{ github.workspace }}/hf_cache
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       SUPABASE_TABLE: ${{ secrets.SUPABASE_TABLE }}
@@ -39,13 +39,27 @@ jobs:
           version: latest
           virtualenvs-in-project: true
 
+      - name: Restore Hugging Face cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/hf_cache
+          key: hf-cache-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
       - name: Start CI containers
         run: docker compose -f docker-compose.ci.yml up -d --remove-orphans
 
       - name: Run tests
-        run: docker compose -f docker-compose.ci.yml run --rm media-rs-backend-ci poetry run pytest -vv
+        run: docker compose -f docker-compose.ci.yml run --rm \
+              -e CACHE_FOLDER=${{ github.workspace }}/hf_cache \
+              media-rs-backend-ci poetry run pytest -vv
+
+      - name: Save Hugging Face cache
+        if: always()
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/hf_cache
+          key: hf-cache-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}  # same key as restore
 
       - name: Tear down CI containers
         if: always()
         run: docker compose -f docker-compose.ci.yml down -v
-
