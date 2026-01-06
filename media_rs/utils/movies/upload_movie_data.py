@@ -1,11 +1,10 @@
 import os
 from pathlib import Path
-from huggingface_hub import login, upload_file, hf_hub_download
-import shutil
+from huggingface_hub import login, upload_file
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 REPO_ID = os.getenv("HF_REPO_ID")
-LOCAL_FOLDER = "media_rs/serving/artifacts"
+LOCAL_FOLDER = "data/movies/cache/"
 REPO_TYPE = "dataset"
 
 if not HF_TOKEN:
