@@ -4,7 +4,7 @@ services:
     image: media-rs/backend-ci:latest
     volumes:
       - .:/app
-      - ./data/movies/raw/ml-latest/hf_cache:/root/.cache/huggingface
+      - ${{ github.workspace }}/hf_cache:/root/.cache/huggingface
     build:
       context: .
       dockerfile: Dockerfile
