@@ -1,10 +1,10 @@
 services:
-  media-rs-backend-dev:
-    container_name: media-rs-backend-dev
-    image: media-rs/backend-dev:latest
+  media-rs-backend-ci:
+    container_name: media-rs-backend-ci
+    image: media-rs/backend-ci:latest
     volumes:
       - .:/app
-      - ./data/movies/raw/ml-latest/hf_cache:/root/.cache/huggingface
+      - ${CACHE_FOLDER}:/root/.cache/huggingface
     build:
       context: .
       dockerfile: Dockerfile
@@ -21,10 +21,4 @@ services:
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_KEY: ${SUPABASE_KEY}
       SUPABASE_TABLE: ${SUPABASE_TABLE}
-    networks:
-      - media-rs-network
-
-networks:
-  media-rs-network:
-    external: true
     
