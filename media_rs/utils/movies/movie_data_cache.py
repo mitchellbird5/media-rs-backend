@@ -1,6 +1,7 @@
 import os
 import pickle
 import numpy as np
+import shutil
 
 from scipy.sparse import load_npz
 from huggingface_hub import hf_hub_download, snapshot_download
@@ -18,6 +19,10 @@ if not HF_REPO:
     raise ValueError(f"Environment variable HF_REPO not defined.")
 if not HF_TOKEN:
     raise ValueError("Set HF_TOKEN environment variable")
+if not CACHE_FOLDER:
+    raise ValueError("CACHE_FOLDER environment variable must be set")
+
+CACHE_FOLDER = str(Path(CACHE_FOLDER).resolve())
 
 class MovieDataCache:
     """
@@ -49,9 +54,11 @@ class MovieDataCache:
 
     def _preload_files(self):
         self.paths = {}
-        
+
+        # ------------------------
+        # Local directory mode
+        # ------------------------
         if self.local_dir:
-            # Use local files
             print(f"Using local files from {self.local_dir}...")
             for f in self.FILES_TO_DOWNLOAD:
                 file_path = self.local_dir / f
@@ -59,40 +66,57 @@ class MovieDataCache:
                     raise FileNotFoundError(f"Expected file {file_path} does not exist.")
                 self.paths[f] = file_path
             print("All local files mapped!")
-            
-        else:
-            # Download from HF Hub
-            if not self.repo_id:
-                raise ValueError("repo_id must be provided if local_dir is not set.")
-            print(f"Preloading Hugging Face files from {self.repo_id}...")
-            
-            for f in self.FILES_TO_DOWNLOAD:
-                if "." not in f:
-                    # folder -> use snapshot_download
-                    path = Path(
-                        snapshot_download(
-                            repo_id=self.repo_id,
-                            repo_type="dataset",
-                            token=HF_TOKEN,
-                            allow_patterns=[f + "/*"],
-                            cache_dir=CACHE_FOLDER
-                        )
-                    )
-                    # snapshot_download returns the root snapshot folder, append subfolder
-                    self.paths[f] = path / f
-                else:
-                    path = Path(hf_hub_download(
-                        repo_id=self.repo_id, 
-                        filename=f, 
-                        repo_type="dataset",
-                        token=HF_TOKEN,
-                        cache_dir=CACHE_FOLDER
-                    ))
-                    self.paths[f] = path
-                    
-                print(f"Cached {f} at {path}")
-                
-            print("All files cached!")
+            return
+
+        # ------------------------
+        # Hugging Face mode
+        # ------------------------
+        if not self.repo_id:
+            raise ValueError("repo_id must be provided if local_dir is not set.")
+
+        cache_root = Path(CACHE_FOLDER)
+        cache_root.mkdir(parents=True, exist_ok=True)
+
+        print(f"Using HF cache folder: {cache_root}")
+
+        # First: build expected paths WITHOUT downloading
+        for f in self.FILES_TO_DOWNLOAD:
+            self.paths[f] = cache_root / f
+
+        # If cache exists but is incomplete → nuke it
+        if cache_root.exists() and not self._is_cache_complete():
+            print("HF cache is incomplete or corrupted — clearing cache")
+            shutil.rmtree(cache_root, ignore_errors=True)
+            cache_root.mkdir(parents=True, exist_ok=True)
+
+        # Download missing files
+        print(f"Preloading Hugging Face files from {self.repo_id}...")
+
+        for f in self.FILES_TO_DOWNLOAD:
+            if "." not in f:
+                snapshot_download(
+                    repo_id=self.repo_id,
+                    repo_type="dataset",
+                    token=HF_TOKEN,
+                    allow_patterns=[f + "/*"],
+                    cache_dir=cache_root,
+                )
+            else:
+                hf_hub_download(
+                    repo_id=self.repo_id,
+                    filename=f,
+                    repo_type="dataset",
+                    token=HF_TOKEN,
+                    cache_dir=cache_root,
+                )
+
+            print(f"Cached {f}")
+
+        # Final validation (fail fast, no hangs)
+        if not self._is_cache_complete():
+            raise RuntimeError("HF cache download completed but cache is still incomplete")
+
+        print("All files cached and verified!")
 
     def _load_all_files(self):
         """
@@ -131,6 +155,13 @@ class MovieDataCache:
             # fallback: return Path object
             return path
         
+    def _is_cache_complete(self) -> bool:
+        for f in self.FILES_TO_DOWNLOAD:
+            path = self.paths.get(f)
+            if not path or not path.exists():
+                return False
+        return True
+        
     def get(self, filename: str):
         """
         Get the in-memory object for a file.
@@ -138,7 +169,7 @@ class MovieDataCache:
         if filename not in self.data:
             raise ValueError(f"{filename} not loaded in memory.")
         return self.data[filename]
-
+    
 _CACHE: MovieDataCache | None = None
 
 def get_movie_data_cache() -> MovieDataCache:
