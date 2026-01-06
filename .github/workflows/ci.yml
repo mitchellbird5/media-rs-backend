@@ -1,63 +1,37 @@
-name: Python CI
+name: Initialize Hugging Face Cache
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # manually trigger once
 
 jobs:
-  test:
+  init-cache:
     runs-on: ubuntu-latest
 
     env:
-      DJANGO_SETTINGS_MODULE: api.api_project.settings
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       HF_REPO_ID: ${{ secrets.HF_REPO_ID }}
       CACHE_FOLDER: ${{ github.workspace }}/hf_cache
-      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-      SUPABASE_TABLE: ${{ secrets.SUPABASE_TABLE }}
-
-    strategy:
-      matrix:
-        python-version: [3.11]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-          virtualenvs-in-project: true
-
-      - name: Restore Hugging Face cache
+      - name: Restore HF cache (empty first time)
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/hf_cache
-          key: hf-cache-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: hf-cache-${{ runner.os }}-init
 
-      - name: Start CI containers
-        run: docker compose -f docker-compose.ci.yml up -d --remove-orphans
+      - name: Build Docker container
+        run: docker compose -f docker-compose.ci.yml build media-rs-backend-ci
 
-      - name: Run tests
-        run: docker compose -f docker-compose.ci.yml run --rm -e CACHE_FOLDER=/home/runner/work/media-rs-backend/media-rs-backend/hf_cache media-rs-backend-ci poetry run pytest -vv
+      - name: Download Hugging Face files
+        run: docker compose -f docker-compose.ci.yml run --rm \
+              -e CACHE_FOLDER=${{ github.workspace }}/hf_cache \
+              media-rs-backend-ci python -c "from media_rs.utils.movies.movie_data_cache import get_movie_data_cache; get_movie_data_cache()"
 
-      - name: Save Hugging Face cache
-        if: always()
+      - name: Save HF cache
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/hf_cache
-          key: hf-cache-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}  # same key as restore
-
-      - name: Tear down CI containers
-        if: always()
-        run: docker compose -f docker-compose.ci.yml down -v
+          key: hf-cache-${{ runner.os }}-init
