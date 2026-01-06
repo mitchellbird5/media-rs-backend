@@ -14,7 +14,7 @@ RUN apt-get update && \
 # Poetry
 # -----------------------------
 ENV POETRY_VERSION=2.2.1
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN curl -sSL https://install.python-poetry.org | python3 - --yes
 
 ENV PATH="/root/.local/bin:$PATH"
 
