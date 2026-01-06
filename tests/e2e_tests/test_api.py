@@ -2,6 +2,9 @@ import pytest
 from rest_framework.test import APIClient
 from media_rs.utils.movies.movie_data_cache import get_movie_data_cache
 
+@pytest.fixture
+def api_client():
+    return APIClient()
 
 @pytest.mark.django_db
 def test_content_api_e2e(api_client: APIClient):
