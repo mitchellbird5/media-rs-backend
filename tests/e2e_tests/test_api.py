@@ -94,3 +94,15 @@ def test_movie_search_api_e2e(api_client: APIClient):
 
     titles = [movie["title"] for movie in data]
     assert any("Toy Story" in title for title in titles), "Expected 'Toy Story' in results"
+
+@pytest.mark.django_db
+def test_movie_images_api_e2e(api_client: APIClient):
+    movie_cache = get_movie_data_cache()
+    
+    url = "/api/movies/images/"
+    response = api_client.get(url, {"titles": ["Toy Story (1995)", "Forrest Gump (1994)"]})
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, dict)
+    assert "Toy Story (1995)" in data
+    assert "Forrest Gump (1994)" in data

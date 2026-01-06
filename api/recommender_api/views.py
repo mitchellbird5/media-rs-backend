@@ -20,7 +20,11 @@ from api.recommender_api.services.collab_services import (
 from api.recommender_api.services.hybrid_services import (
     get_hybrid_recommendations
 )
+from api.recommender_api.services.tmdb import (
+    get_multiple_movie_images
+)
 from api.recommender_api.services.database_query import MoviesService
+
 
 from media_rs.utils.session import get_or_create_session_id
 
@@ -168,3 +172,23 @@ class MovieSearchView(APIView):
                 {"error": str(e)}
             ).content
             return response
+        
+class MovieImagesView(APIView):
+    def get(self, request):
+        titles = request.GET.getlist("titles")
+
+        if not titles:
+            return Response(
+                {"error": "At least one title parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            images = get_multiple_movie_images(titles)
+            return Response(images)
+
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to get movie images: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
