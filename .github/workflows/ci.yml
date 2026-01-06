@@ -29,9 +29,7 @@ jobs:
         run: docker compose -f docker-compose.ci.yml build media-rs-backend-ci
 
       - name: Download Hugging Face files
-        run: docker compose -f docker-compose.ci.yml run --rm \
-              -e CACHE_FOLDER=${{ github.workspace }}/hf_cache \
-              media-rs-backend-ci python -c "from media_rs.utils.movies.movie_data_cache import get_movie_data_cache; get_movie_data_cache()"
+        run: docker compose -f docker-compose.ci.yml run --rm -e CACHE_FOLDER=${{ github.workspace }}/hf_cache media-rs-backend-ci python -c "from media_rs.utils.movies.movie_data_cache import get_movie_data_cache; get_movie_data_cache()"
 
       - name: Save HF cache
         uses: actions/cache@v3
