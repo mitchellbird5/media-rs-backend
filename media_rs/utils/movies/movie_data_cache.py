@@ -1,6 +1,7 @@
 import os
 import pickle
 import numpy as np
+import shutil
 
 from scipy.sparse import load_npz
 from huggingface_hub import hf_hub_download, snapshot_download
@@ -18,6 +19,10 @@ if not HF_REPO:
     raise ValueError(f"Environment variable HF_REPO not defined.")
 if not HF_TOKEN:
     raise ValueError("Set HF_TOKEN environment variable")
+if not CACHE_FOLDER:
+    raise ValueError("CACHE_FOLDER environment variable must be set")
+
+print(f"Using CACHE_FOLDER at {CACHE_FOLDER}")
 
 class MovieDataCache:
     """
@@ -131,6 +136,13 @@ class MovieDataCache:
             # fallback: return Path object
             return path
         
+    def _is_cache_complete(self) -> bool:
+        for f in self.FILES_TO_DOWNLOAD:
+            path = self.paths.get(f)
+            if not path or not path.exists():
+                return False
+        return True
+        
     def get(self, filename: str):
         """
         Get the in-memory object for a file.
@@ -138,7 +150,7 @@ class MovieDataCache:
         if filename not in self.data:
             raise ValueError(f"{filename} not loaded in memory.")
         return self.data[filename]
-
+    
 _CACHE: MovieDataCache | None = None
 
 def get_movie_data_cache() -> MovieDataCache:
