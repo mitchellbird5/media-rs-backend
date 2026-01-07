@@ -11,15 +11,35 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      DJANGO_SETTINGS_MODULE: api.api_project.settings
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       HF_REPO_ID: ${{ secrets.HF_REPO_ID }}
       CACHE_FOLDER: ${{ github.workspace }}/hf_cache
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_TABLE: ${{ secrets.SUPABASE_TABLE }}
+
+    strategy:
+      matrix:
+        python-version: [3.11]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Restore HF cache (empty first time)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-in-project: true
+
+      - name: Restore Hugging Face cache (global)
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/hf_cache
@@ -27,14 +47,21 @@ jobs:
           restore-keys: |
             hf-cache-global
 
-      - name: Build Docker container
-        run: docker compose -f docker-compose.ci.yml build media-rs-backend-ci
+      - name: Start CI containers
+        run: docker compose -f docker-compose.ci.yml up -d --remove-orphans
 
-      - name: Download Hugging Face files
-        run: docker compose -f docker-compose.ci.yml run --rm -e CACHE_FOLDER=${{ github.workspace }}/hf_cache media-rs-backend-ci python -c "from media_rs.utils.movies.movie_data_cache import get_movie_data_cache; get_movie_data_cache()"
+      - name: Run tests with cached HF data
+        run: docker compose -f docker-compose.ci.yml run --rm \
+              -e CACHE_FOLDER=${{ github.workspace }}/hf_cache \
+              media-rs-backend-ci poetry run pytest -vv
 
-      - name: Save HF cache
+      - name: Save Hugging Face cache (global)
+        if: always()
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/hf_cache
           key: hf-cache-global
+
+      - name: Tear down CI containers
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down -v
