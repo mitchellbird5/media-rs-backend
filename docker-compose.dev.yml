@@ -22,6 +22,7 @@ services:
       SUPABASE_KEY: ${SUPABASE_KEY}
       SUPABASE_TABLE: ${SUPABASE_TABLE}
       TMDB_KEY: ${TMDB_KEY}
+      CACHE_FOLDER: ${CACHE_FOLDER}
 
     networks:
       - media-rs-network
