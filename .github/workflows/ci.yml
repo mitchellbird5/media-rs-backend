@@ -46,6 +46,9 @@ jobs:
           restore-keys: |
             hf-cache-${{ runner.os }}
 
+      - name: Install dependencies
+        run: poetry install --no-interaction --with training,dev
+
       - name: Warm up HF cache
         run: |
           echo "Downloading Hugging Face models and datasets..."
