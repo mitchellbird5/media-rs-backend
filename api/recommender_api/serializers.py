@@ -46,7 +46,7 @@ class ContentDescriptionInputSerializer(serializers.Serializer):
     
 class MovieSearchInputSerializer(serializers.Serializer):
     query = serializers.CharField()
-    limit = serializers.IntegerField(default=10, min_value=1, max_value=100)
+    limit = serializers.IntegerField(required=False, default=10, min_value=1, max_value=100)
 
 # -----------------------------
 # Output serializers

@@ -152,13 +152,14 @@ class HybridRecommendationAPI(APIView):
     
 class MovieSearchView(APIView):
     def get(self, request):
-        serializer = MovieSearchInputSerializer(data=request.query_params)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Coerce query params to dict with proper types
+        params = request.query_params.dict()
 
-        data = serializer.validated_data
-        query = data.get("query")
-        limit = data.get("limit", 10)
+        serializer = MovieSearchInputSerializer(data=params)
+        serializer.is_valid(raise_exception=True)
+
+        query = serializer.validated_data["query"]
+        limit = serializer.validated_data["limit"]
 
         response = JsonResponse({}, safe=False)
 

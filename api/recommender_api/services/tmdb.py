@@ -1,9 +1,6 @@
 import os
 import requests
 
-from dotenv import load_dotenv
-load_dotenv()
-
 from typing import List
 
 from media_rs.utils.item_index import ItemIndex
