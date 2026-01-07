@@ -51,9 +51,7 @@ jobs:
         run: docker compose -f docker-compose.ci.yml up -d --remove-orphans
 
       - name: Run tests with cached HF data
-        run: docker compose -f docker-compose.ci.yml run --rm \
-              -e CACHE_FOLDER=${{ github.workspace }}/hf_cache \
-              media-rs-backend-ci poetry run pytest -vv
+        run: docker compose -f docker-compose.ci.yml run --rm -e CACHE_FOLDER=${{ github.workspace }}/hf_cache media-rs-backend-ci poetry run pytest -vv
 
       - name: Save Hugging Face cache (global)
         if: always()
