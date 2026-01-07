@@ -46,13 +46,10 @@ jobs:
           restore-keys: |
             hf-cache-${{ runner.os }}
 
-      - name: Install dependencies
-        run: poetry install --no-interaction --with training,dev
-
       - name: Warm up HF cache
         run: |
           echo "Downloading Hugging Face models and datasets..."
-          python - <<'EOF'
+          poetry run python - <<'EOF'
           import os
           from media_rs.utils.movies.movie_data_cache import get_movie_data_cache
           os.environ["CACHE_FOLDER"] = "${CACHE_FOLDER}"
