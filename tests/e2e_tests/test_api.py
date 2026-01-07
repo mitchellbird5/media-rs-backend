@@ -90,7 +90,7 @@ def test_movie_search_api_e2e(api_client: APIClient):
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) != 0, "Expected at least one movie in the response"
+    assert len(data) == 5, "Expected at least one movie in the response"
 
     titles = [movie["title"] for movie in data]
     assert any("Toy Story" in title for title in titles), "Expected 'Toy Story' in results"

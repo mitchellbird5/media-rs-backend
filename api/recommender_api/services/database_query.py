@@ -27,7 +27,7 @@ class MoviesService:
     def search_movies(
         query: str,
         user_key: str,   # IP address or user ID
-        limit: int = 100
+        limit: int
     ) -> List[Dict[str, Any]]:
 
         if not query or len(query.strip()) < 2:
@@ -43,10 +43,11 @@ class MoviesService:
                 .table(SUPABASE_TABLE)
                 .select("movieId, title")
                 .ilike("title", f"%{query}%")
+                .order("title")
                 .limit(limit)
                 .execute()
             )
-            return response.data
+            return response.data[:limit]
 
         except Exception as e:
             raise Exception(f"Supabase error: {e}")
