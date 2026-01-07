@@ -8,6 +8,7 @@ from api.recommender_api.serializers import (
     ContentDescriptionInputSerializer,
     UserCFInputSerializer,
     HybridInputSerializer,
+    MovieSearchInputSerializer
 )
 from api.recommender_api.services.content_services import (
     get_content_recommendations,
@@ -151,7 +152,13 @@ class HybridRecommendationAPI(APIView):
     
 class MovieSearchView(APIView):
     def get(self, request):
-        query = request.GET.get("query", "").strip()
+        serializer = MovieSearchInputSerializer(data=request.query_params)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        query = data.get("query")
+        limit = data.get("limit", 10)
 
         response = JsonResponse({}, safe=False)
 
@@ -160,7 +167,8 @@ class MovieSearchView(APIView):
 
             results = MoviesService.search_movies(
                 query=query,
-                user_key=f"session:{session_id}"
+                user_key=f"session:{session_id}",
+                limit=limit
             )
 
             response.content = JsonResponse(results, safe=False).content

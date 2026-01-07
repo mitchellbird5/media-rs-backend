@@ -43,6 +43,10 @@ class ContentRecommendationInputSerializer(serializers.Serializer):
 class ContentDescriptionInputSerializer(serializers.Serializer):
     description = serializers.CharField()
     top_n = serializers.IntegerField(default=10, min_value=1, max_value=100)
+    
+class MovieSearchInputSerializer(serializers.Serializer):
+    query = serializers.CharField()
+    limit = serializers.IntegerField(default=10, min_value=1, max_value=100)
 
 # -----------------------------
 # Output serializers
