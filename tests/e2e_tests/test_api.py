@@ -86,7 +86,7 @@ def test_movie_search_api_e2e(api_client: APIClient):
     # movie_cache = get_movie_data_cache()
     
     url = "/api/movies/search/"
-    response = api_client.get(url, {"query": "Toy Story"})
+    response = api_client.get(url, {"query": "Toy Story", "limit": 5})
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
