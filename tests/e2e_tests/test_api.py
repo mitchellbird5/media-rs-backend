@@ -97,12 +97,26 @@ def test_movie_search_api_e2e(api_client: APIClient):
 
 @pytest.mark.django_db
 def test_movie_images_api_e2e(api_client: APIClient):
-    movie_cache = get_movie_data_cache()
-    
     url = "/api/movies/images/"
     response = api_client.get(url, {"titles": ["Toy Story (1995)", "Forrest Gump (1994)"]})
+    
+    # Check response status
     assert response.status_code == 200
+
+    # Parse JSON
     data = response.json()
-    assert isinstance(data, dict)
-    assert "Toy Story (1995)" in data
-    assert "Forrest Gump (1994)" in data
+    
+    # The API now returns a list
+    assert isinstance(data, list)
+    assert len(data) == 2
+
+    # Check that each movie is present and has poster_path/backdrop_path keys
+    titles_returned = [item["title"] for item in data]
+    assert "Toy Story (1995)" in titles_returned
+    assert "Forrest Gump (1994)" in titles_returned
+
+    for item in data:
+        assert "title" in item
+        # poster_path/backdrop_path can be None if TMDB has no image
+        assert "poster_path" in item
+        assert "backdrop_path" in item
