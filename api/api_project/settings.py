@@ -29,8 +29,9 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    # '127.0.0.1', 
-    # 'localhost',
+    '127.0.0.1', 
+    'localhost',
+    "172.29.191.90",
     "media-rs.test",
     "media-rs-backend-dev",  
     "media-rs-frontend-dev",
@@ -46,10 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework'
+    'rest_framework',
+    # 'corsheaders'
 ]
 
 MIDDLEWARE = [
+    # "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
