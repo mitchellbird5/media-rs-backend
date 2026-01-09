@@ -152,8 +152,15 @@ class HybridRecommendationAPI(APIView):
     
 class MovieSearchView(APIView):
     def get(self, request):
-        # Coerce query params to dict with proper types
-        params = request.query_params.dict()
+        params = request.query_params.copy()  # preserve MultiValueDict
+
+        # Coerce 'limit' to int if present
+        limit = params.get("limit")
+        if limit is not None:
+            try:
+                params["limit"] = int(limit)
+            except ValueError:
+                return Response({"limit": "Must be an integer"}, status=400)
 
         serializer = MovieSearchInputSerializer(data=params)
         serializer.is_valid(raise_exception=True)
@@ -185,7 +192,6 @@ class MovieSearchView(APIView):
 class MovieImagesView(APIView):
     def get(self, request):
         titles = request.GET.getlist("titles")
-
         if not titles:
             return Response(
                 {"error": "At least one title parameter is required."},
@@ -194,8 +200,9 @@ class MovieImagesView(APIView):
 
         try:
             images = get_multiple_movie_images(titles)
-            return Response(images)
-
+            # Convert dataclasses to dicts
+            images_dict = [image.__dict__ for image in images]
+            return Response(images_dict)
         except Exception as e:
             return Response(
                 {"error": f"Failed to get movie images: {str(e)}"},
