@@ -10,7 +10,7 @@ cache = get_movie_data_cache()
 def get_content_recommendations(
     movie_title: str,
     top_n: int = 10
-) -> List[ContentSimilarity]:
+) -> List[str]:
     """
     Service function to get content-based recommendations.
     """
@@ -25,7 +25,7 @@ def get_content_recommendations(
 def get_content_recommendations_from_description(
     description: str,
     top_n: int = 10
-) -> List[ContentSimilarity]:
+) -> List[str]:
     """
     Service function to get content-based recommendations.
     """

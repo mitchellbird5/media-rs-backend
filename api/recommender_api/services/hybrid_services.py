@@ -18,7 +18,7 @@ def get_hybrid_recommendations(
     beta: float,
     top_n: int,
     k_similar_users: int
-) -> List[ContentSimilarity]:
+) -> List[str]:
 
     item_idx = ItemIndex(cache.get("item_index.pkl"))
     item_embeddings = cache.load("movies_item_embeddings.npy")
