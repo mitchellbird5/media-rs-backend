@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
+from typing import TypedDict
 
-class Rating(BaseModel):
-    title: str
-    rating: float = Field(ge=0, le=5)
+class Rating(TypedDict):
+    name: str
+    value: float

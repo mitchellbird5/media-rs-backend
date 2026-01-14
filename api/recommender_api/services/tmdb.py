@@ -1,57 +1,77 @@
 import os
 import requests
 
-from typing import List
+from dataclasses import dataclass, field
+from typing import Optional, List, Dict
+
 
 from media_rs.utils.item_index import ItemIndex
 from media_rs.utils.movies.movie_data_cache import get_movie_data_cache
 
 cache = get_movie_data_cache()
 
-from dataclasses import dataclass
-from typing import Optional, List
-
+TMDB_KEY = os.getenv("TMDB_KEY")
+    
 @dataclass
-class MovieImageData:
-    title: str
+class MovieData:
+    title: str = ""
+    tmdb_id: Optional[int] = None
+    imdb_id: Optional[str] = None
     poster_path: Optional[str] = None
     backdrop_path: Optional[str] = None
+    genres: Dict[int, str] = field(default_factory=dict)
+    overview: Optional[str] = None
+    runtime: Optional[int] = None
+    popularity: Optional[float] = None
+    release_date: Optional[str] = None
+    tagline: Optional[str] = None
+    vote_average: Optional[float] = None
 
-def get_movie_images(title: str) -> MovieImageData:
-    item_idx = ItemIndex(cache.get("item_index.pkl"))
-    
-    idx = item_idx.title_to_idx[title]
-    movie_id = item_idx.idx_to_movieId[idx]
-    tmdb_id = item_idx.movieId_to_tmdbId[movie_id]
-
-    url = f"https://api.themoviedb.org/3/movie/{int(tmdb_id)}/images"
-    TMDB_KEY = os.getenv("TMDB_KEY")
-    
+def get_movie_details(tmdb_id: int) -> MovieData:
+    url = f"https://api.themoviedb.org/3/movie/{tmdb_id}"
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {TMDB_KEY}"
     }
 
     response = requests.get(url, headers=headers)
-    response.raise_for_status()  # raises exception for HTTP errors
+    response.raise_for_status()
     data = response.json()
 
-    # Pick first poster and backdrop if available
-    poster_path = get_first_image_by_language(data.get("posters"), lang="en")
-    backdrop_path = get_first_image_by_language(data.get("backdrops"), lang="en")
+    # Use .get() for safety
+    genres = {g["id"]: g["name"] for g in data.get("genres", []) if "id" in g and "name" in g}
 
+    return MovieData(
+        tmdb_id=tmdb_id,
+        imdb_id=data.get("imdb_id"),
+        poster_path=data.get("poster_path"),
+        backdrop_path=data.get("backdrop_path"),
+        genres=genres,
+        overview=data.get("overview"),
+        runtime=data.get("runtime"),
+        popularity=data.get("popularity"),
+        release_date=data.get("release_date"),
+        tagline=data.get("tagline"),
+        vote_average=data.get("vote_average")
+    )
 
-    return MovieImageData(title=title, poster_path=poster_path, backdrop_path=backdrop_path)
+def get_movie_data(title: str) -> MovieData:
+    item_idx = ItemIndex(cache.get("item_index.pkl"))
+    
+    idx = item_idx.title_to_idx.get(title)
+    if idx is None:
+        return MovieData(title=title)
+    
+    movie_id = item_idx.idx_to_movieId.get(idx)
+    tmdb_id = item_idx.movieId_to_tmdbId.get(movie_id)
 
-def get_multiple_movie_images(titles: List[str]) -> List[MovieImageData]:
-    images = []
-    for title in titles:
-        try:
-            images.append(get_movie_images(title))
-        except Exception:
-            # if one movie fails, still continue with the rest
-            images.append(MovieImageData(title=title))
-    return images
+    if tmdb_id is None:
+        return MovieData(title=title)
+    
+    data = get_movie_details(tmdb_id)
+    data.title = title
+
+    return data
 
 def get_first_image_by_language(images_list: list, lang: str = "en") -> str | None:
     if not images_list:
@@ -62,3 +82,12 @@ def get_first_image_by_language(images_list: list, lang: str = "en") -> str | No
             return image.get("file_path")
     # fallback to first image if none match language
     return images_list[0].get("file_path")
+
+def get_multiple_movie_data(titles: List[str]) -> List[MovieData]:
+    data: List[MovieData] = []
+    for title in titles:
+        try:
+            data.append(get_movie_data(title))
+        except Exception:
+            data.append(MovieData(title=title))
+    return data

@@ -22,7 +22,7 @@ from api.recommender_api.services.hybrid_services import (
     get_hybrid_recommendations
 )
 from api.recommender_api.services.tmdb import (
-    get_multiple_movie_images
+    get_multiple_movie_data
 )
 from api.recommender_api.services.database_query import MoviesService
 
@@ -189,7 +189,7 @@ class MovieSearchView(APIView):
             ).content
             return response
         
-class MovieImagesView(APIView):
+class MovieDataView(APIView):
     def get(self, request):
         titles = request.GET.getlist("titles")
         if not titles:
@@ -199,12 +199,11 @@ class MovieImagesView(APIView):
             )
 
         try:
-            images = get_multiple_movie_images(titles)
-            # Convert dataclasses to dicts
-            images_dict = [image.__dict__ for image in images]
-            return Response(images_dict)
+            data = get_multiple_movie_data(titles)
+            data_dict = [d.__dict__ for d in data]
+            return Response(data_dict)
         except Exception as e:
             return Response(
-                {"error": f"Failed to get movie images: {str(e)}"},
+                {"error": f"Failed to get movie data: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
