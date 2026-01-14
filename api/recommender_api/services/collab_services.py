@@ -5,6 +5,7 @@ from media_rs.serving.recommender.build.build_collab_model import (
     get_user_cf_model
 )
 from media_rs.utils.movies.movie_data_cache import get_movie_data_cache
+from media_rs.rs_types.rating import Rating
 
 from typing import List, Dict
 
@@ -23,17 +24,17 @@ def get_item_cf_recommendations(
     return [item_idx.idx_to_title[r[0]] for r in recommendations]
 
 def get_user_cf_recommendations(
-    ratings: Dict[str, float],
+    ratings: List[Rating],
     top_n: int,
     k_similar_users: int
-) -> List[ContentSimilarity]:
+) -> List[str]:
     
     item_idx = ItemIndex(cache.get("item_index.pkl"))
     
     index_ratings = {
-        item_idx.title_to_idx[title]: score
-        for title, score in ratings.items()
-        if title in item_idx.title_to_idx
+        item_idx.title_to_idx[r['name']]: r['value']
+        for r in ratings
+        if r['name'] in item_idx.title_to_idx
     }
     
     rs = get_user_cf_model(cache)
