@@ -49,7 +49,16 @@ def test_user_cf_api_e2e(api_client: APIClient):
     
     url = "/api/recommend/user-cf/"
     payload = {
-        "ratings": {'Toy Story 2 (1999)': 5, 'Forrest Gump (1994)': 3},
+        "ratings": [
+            {
+                'name': 'Toy Story 2 (1999)',
+                'value': 5, 
+            },
+            {
+                'name':'Forrest Gump (1994)',
+                'value': 3
+            }
+        ],
         "top_n": 2,
         "k_similar_users": 2
     }
@@ -96,27 +105,24 @@ def test_movie_search_api_e2e(api_client: APIClient):
     assert any("Toy Story" in title for title in titles), "Expected 'Toy Story' in results"
 
 @pytest.mark.django_db
-def test_movie_images_api_e2e(api_client: APIClient):
-    url = "/api/movies/images/"
+def test_movie_data_api_e2e(api_client: APIClient):
+    url = "/api/movies/data/"
     response = api_client.get(url, {"titles": ["Toy Story (1995)", "Forrest Gump (1994)"]})
     
-    # Check response status
     assert response.status_code == 200
-
-    # Parse JSON
     data = response.json()
     
-    # The API now returns a list
     assert isinstance(data, list)
     assert len(data) == 2
 
-    # Check that each movie is present and has poster_path/backdrop_path keys
-    titles_returned = [item["title"] for item in data]
-    assert "Toy Story (1995)" in titles_returned
-    assert "Forrest Gump (1994)" in titles_returned
+    titles_returned = [item.get("title") for item in data]
+    assert "Toy Story" in titles_returned
+    assert "Forrest Gump" in titles_returned
 
     for item in data:
         assert "title" in item
-        # poster_path/backdrop_path can be None if TMDB has no image
+        # These can be None
         assert "poster_path" in item
         assert "backdrop_path" in item
+        # Optional type-safe checks
+        assert isinstance(item.get("genres", {}), dict)
