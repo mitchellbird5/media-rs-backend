@@ -9,6 +9,7 @@ from sentence_transformers import SentenceTransformer
 from media_rs.utils.load_data import load_faiss_index
 
 from pathlib import Path
+from typing import Optional
 
 
 HF_TOKEN = os.getenv("HF_TOKEN")
@@ -153,8 +154,8 @@ class MovieDataCache:
     
 _CACHE: MovieDataCache | None = None
 
-def get_movie_data_cache() -> MovieDataCache:
+def get_movie_data_cache(local_dir: Optional[str]=None) -> MovieDataCache:
     global _CACHE
     if _CACHE is None:
-        _CACHE = MovieDataCache(repo_id=HF_REPO)
+        _CACHE = MovieDataCache(repo_id=HF_REPO, local_dir=local_dir)
     return _CACHE
