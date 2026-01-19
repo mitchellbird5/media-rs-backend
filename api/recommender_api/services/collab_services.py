@@ -26,8 +26,10 @@ def get_item_cf_recommendations(
         raise ValueError(f"Multiple titles found that match '{movie_title}'")
     elif len(idx) != 1:
         raise ValueError(f"No titles found that match '{movie_title}'")
+    else: 
+        index = idx[0]
     
-    recommendations = rs.recommend(idx[0], top_n)
+    recommendations = rs.recommend(index, top_n)
     return [item_idx.idx_to_title(r[0]) for r in recommendations]
 
 def get_user_cf_recommendations(
