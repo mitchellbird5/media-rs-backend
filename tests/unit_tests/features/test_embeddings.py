@@ -1,6 +1,8 @@
 # tests/test_embedding_utils.py
 import pytest
 import numpy as np
+from scipy.sparse import csr_matrix
+import faiss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sentence_transformers import SentenceTransformer
@@ -73,15 +75,41 @@ def test_compute_tfidf_embeddings_with_existing_vectorizer_svd():
 # -----------------------------
 def test_compute_user_embeddings():
     # Item embeddings: 3 items, 2 dims
-    item_embeddings = np.array([[1, 0], [0, 1], [1, 1]])
-    user_item_dict = {0: [0, 2], 1: [1]}
+    item_embeddings = np.array(
+        [[1.0, 0.0],
+         [0.0, 1.0],
+         [1.0, 1.0]],
+        dtype=np.float32
+    )
 
-    user_embeds = compute_user_embeddings(user_item_dict, item_embeddings)
+    # User–item ratings matrix
+    # user 0 rated items 0 and 2
+    # user 1 rated item 1
+    data = np.array([1.0, 3.0, 2.0], dtype=np.float32)
+    rows = np.array([0, 0, 1])
+    cols = np.array([0, 2, 1])
 
-    assert isinstance(user_embeds, dict)
-    assert len(user_embeds) == 2
+    user_item_matrix = csr_matrix((data, (rows, cols)), shape=(2, 3))
 
-    # Check computed embeddings
-    np.testing.assert_array_almost_equal(user_embeds[0], np.mean(item_embeddings[[0, 2]], axis=0))
-    np.testing.assert_array_almost_equal(user_embeds[1], item_embeddings[1])
+    user_embeds = compute_user_embeddings(user_item_matrix, item_embeddings)
 
+    # Basic shape/type checks
+    assert isinstance(user_embeds, np.ndarray)
+    assert user_embeds.shape == (2, 2)
+
+    # ---- Expected embeddings (before normalization) ----
+    # User 0:
+    # ratings = [1, 3] → mean = 2 → centered = [-1, 1]
+    v0 = np.mean(
+        item_embeddings[[0, 2]] * np.array([-1.0, 1.0])[:, None],
+        axis=0,
+    )
+
+    # User 1:
+    # ratings = [2] → mean = 2 → centered = [0]
+    v1 = np.array([0.0, 0.0], dtype=np.float32)
+
+    expected = np.vstack([v0, v1]).astype(np.float32)
+    faiss.normalize_L2(expected)
+
+    np.testing.assert_array_almost_equal(user_embeds, expected)
