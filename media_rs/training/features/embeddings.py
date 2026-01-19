@@ -1,8 +1,10 @@
 import numpy as np
+import faiss
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sentence_transformers import SentenceTransformer
+from scipy.sparse import csr_matrix
 
 from typing import List, Dict, Tuple
 
@@ -67,22 +69,28 @@ def compute_tfidf_embeddings(
 
 
 def compute_user_embeddings(
-    user_item_dict: Dict[int, List[int]],
-    item_embeddings: np.ndarray
-) -> Dict[int, np.ndarray]:
-    """
-    Compute embeddings for user ratings
+    user_item_matrix: csr_matrix,
+    item_embeddings: np.ndarray,
+) -> np.ndarray:
 
-    Args:
-        user_item_dict (Dict[int, List[int]]): Dictionary of userID to other user indices
-        item_embeddings (np.ndarray): Embeddings of items
+    num_users = user_item_matrix.shape[0]
+    emb_dim = item_embeddings.shape[1]
 
-    Returns:
-        Dict[int, np.ndarray]: User embeddings
-    """
+    user_embeddings = np.zeros((num_users, emb_dim), dtype=np.float32)
 
-    user_embeddings = {}
-    for user_id, item_ids in user_item_dict.items():
-        vectors = item_embeddings[item_ids]
-        user_embeddings[user_id] = np.mean(vectors, axis=0)
+    for uid in range(num_users):
+        row = user_item_matrix.getrow(uid)
+
+        if row.nnz == 0:
+            continue
+
+        item_ids = row.indices
+        ratings = row.data.astype(np.float32)
+
+        ratings = ratings - ratings.mean()
+
+        vectors = item_embeddings[item_ids] * ratings[:, None]
+        user_embeddings[uid] = vectors.mean(axis=0)
+
+    faiss.normalize_L2(user_embeddings)
     return user_embeddings
