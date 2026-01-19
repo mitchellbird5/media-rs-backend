@@ -44,9 +44,7 @@ def test_item_cf_api_e2e(api_client: APIClient):
 
 
 @pytest.mark.django_db
-def test_user_cf_api_e2e(api_client: APIClient):
-    movie_cache = get_movie_data_cache()
-    
+def test_user_cf_api_e2e(api_client: APIClient): 
     url = "/api/recommend/user-cf/"
     payload = {
         "ratings": [
@@ -71,12 +69,19 @@ def test_user_cf_api_e2e(api_client: APIClient):
 
 @pytest.mark.django_db
 def test_hybrid_api_e2e(api_client: APIClient):
-    movie_cache = get_movie_data_cache()
-    
     url = "/api/recommend/hybrid/"
     payload = {
         "movie_title": "Toy Story (1995)",
-        "ratings": {'Toy Story 2 (1999)': 5},
+        "ratings": [
+            {
+                'name': 'Toy Story 2 (1999)',
+                'value': 5, 
+            },
+            {
+                'name':'Forrest Gump (1994)',
+                'value': 3
+            }
+        ],
         "alpha": 0.4,
         "beta": 0.3,
         "top_n": 2,
@@ -116,8 +121,8 @@ def test_movie_data_api_e2e(api_client: APIClient):
     assert len(data) == 2
 
     titles_returned = [item.get("title") for item in data]
-    assert "Toy Story" in titles_returned
-    assert "Forrest Gump" in titles_returned
+    assert "Toy Story (1995)" in titles_returned
+    assert "Forrest Gump (1994)" in titles_returned
 
     for item in data:
         assert "title" in item

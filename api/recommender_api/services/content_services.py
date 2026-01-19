@@ -19,8 +19,16 @@ def get_content_recommendations(
     
     rs_content = get_content_similarity_model(cache)
     
-    recommendations = rs_content.recommend(item_idx.title_to_idx[movie_title], top_n)
-    return [item_idx.idx_to_title[r[0]] for r in recommendations]
+    idx = item_idx.title_to_idx(movie_title)
+    if len(idx) > 1:
+        raise ValueError(f"Multiple titles found that match '{movie_title}'")
+    elif len(idx) != 1:
+        raise ValueError(f"No titles found that match '{movie_title}'")
+    else: 
+        index = idx[0]
+    
+    recommendations = rs_content.recommend(index, top_n)
+    return [item_idx.idx_to_title(r[0]) for r in recommendations]
 
 def get_content_recommendations_from_description(
     description: str,
@@ -34,5 +42,5 @@ def get_content_recommendations_from_description(
     rs = get_content_similarity_model(cache)
     
     recommendations = rs.recommend_from_description(description, top_n)
-    return [item_idx.idx_to_title[r[0]] for r in recommendations]
+    return [item_idx.idx_to_title(r[0]) for r in recommendations]
 
