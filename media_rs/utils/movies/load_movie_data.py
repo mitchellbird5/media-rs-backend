@@ -1,4 +1,6 @@
 import pandas as pd
+import re
+import unicodedata
 
 from pathlib import Path
 from typing import Tuple
@@ -6,6 +8,27 @@ from typing import Tuple
 from media_rs.utils.load_data import (
     load_dataframe
 )
+
+def norm(title: str) -> str:
+    if not title:
+        return ""
+
+    # Unicode normalization (é → é)
+    title = unicodedata.normalize("NFKC", title)
+
+    # Lowercase
+    title = title.lower()
+
+    # Strip surrounding whitespace
+    title = title.strip()
+
+    # Replace common punctuation with spaces
+    title = re.sub(r"[^\w\s()\-]", " ", title)
+
+    # Collapse whitespace
+    title = re.sub(r"\s+", " ", title)
+
+    return title
 
 def load_all_movie_data(
     wdir: Path
@@ -25,6 +48,8 @@ def load_all_movie_data(
     links = load_dataframe(wdir.joinpath("links.csv"))
 
     movies = add_tags_to_movies(movies, tags)
+    movies["title_norm"] = movies["title"].apply(norm)
+    
     return movies, ratings, tags, links
 
 def add_tags_to_movies(
