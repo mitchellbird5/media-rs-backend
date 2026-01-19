@@ -17,10 +17,8 @@ def compute_item_and_user_embeddings(
     sbert_model, item_embeddings = compute_sbert_embeddings(content)
 
     # User embeddings (sparse-aware)
-    user_embeddings_dict = compute_user_embeddings(
-        {uid: user_item_matrix[uid].indices.tolist() for uid in range(user_item_matrix.shape[0])},
-        item_embeddings
+    user_embeddings = compute_user_embeddings(
+        user_item_matrix,
+        item_embeddings,
     )
-    user_embeddings = np.vstack([user_embeddings_dict[uid] for uid in range(user_item_matrix.shape[0])]).astype(np.float32)
-
     return item_embeddings, sbert_model, user_embeddings

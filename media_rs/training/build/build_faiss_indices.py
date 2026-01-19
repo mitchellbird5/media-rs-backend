@@ -22,7 +22,6 @@ def build_faiss_indices(
     
     faiss_index_content = build_faiss_index(item_embeddings, metric=FaissMethod.COSINE)
 
-    faiss.normalize_L2(user_embeddings)
     faiss_index_users = faiss.IndexFlatIP(user_embeddings.shape[1])
     faiss_index_users.add(user_embeddings)
 

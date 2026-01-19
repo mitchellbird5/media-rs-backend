@@ -7,11 +7,14 @@ from media_rs.utils.movies.build_user_item_matrix import build_user_item_matrix
 from media_rs.training.build.compute_embeddings import compute_item_and_user_embeddings
 from media_rs.training.build.build_topk_graphs import build_item_cf_topk, build_topk_content
 from media_rs.training.build.build_faiss_indices import build_faiss_indices
+
 from media_rs.utils.movies.build_item_index import build_item_index
 from media_rs.utils.load_data import save_pickle, save_numpy, save_faiss_index
 
 save_dir = Path("data/movies/cache/")
 file_dir = Path("data/movies/raw/ml-latest/")
+# save_dir = Path("data/movies/raw/ml-latest-small/cache/")
+# file_dir = Path("data/movies/raw/ml-latest-small/")
 
 # Load data
 movies, ratings, tags, links = load_all_movie_data(file_dir)
@@ -27,7 +30,11 @@ item_index = build_item_index(movies, links)
 # -----------------------------
 # Build user-item matrix
 # -----------------------------
-user_item_matrix, userId_to_idx, idx_to_userId = build_user_item_matrix(ratings, movies, item_index['title_to_idx'])
+user_item_matrix, userId_to_idx, idx_to_userId = build_user_item_matrix(
+    ratings, 
+    movies, 
+    item_index["movieId_to_idx"]
+)
 
 user_index = {
     "num_users": len(userId_to_idx),
