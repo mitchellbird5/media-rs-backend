@@ -20,8 +20,11 @@ class ItemIndex:
 
     def title_to_idx(self, title: str) -> List[int]:
         """Return ALL possible item indices for a title"""
-        mids = self.title_to_movieId.get(norm(title), [])
-        return [self.movieId_to_idx[mid] for mid in mids]
+        mids = self.title_to_movieId.get(title)
+        if not mids:
+            raise ValueError(f"No titles found that match '{title}'")
+        else: 
+            return mids
 
     def idx_to_title(self, idx: int) -> str:
         return self.movieId_to_title[self.idx_to_movieId[idx]]

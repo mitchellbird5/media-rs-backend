@@ -58,11 +58,10 @@ def get_movie_details(tmdb_id: int) -> MovieData:
 def get_movie_data(title: str) -> MovieData:
     item_idx = ItemIndex(cache.get("item_index.pkl"))
     
-    idx = item_idx.title_to_idx.get(title)
-    if idx is None:
+    movie_id = item_idx.title_to_movieId[title]
+    if movie_id is None:
         return MovieData(title=title)
     
-    movie_id = item_idx.idx_to_movieId.get(idx)
     tmdb_id = item_idx.movieId_to_tmdbId.get(movie_id)
 
     if tmdb_id is None:

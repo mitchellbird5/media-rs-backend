@@ -2,11 +2,17 @@
 import pandas as pd
 import numpy as np
 
-from typing import List, Dict
+from typing import List, Dict, Union
 from media_rs.rs_types.model import ContentSimilarity
 
-from media_rs.serving.recommender.models.content import ContentSimilarityModel
-from media_rs.serving.recommender.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
+from media_rs.serving.recommender.models.content import (
+    ContentSimilaritySBERTModel,
+    ContentSimilarityTFIDFModel
+)
+from media_rs.serving.recommender.models.collab import (
+    ItemItemCollaborativeModel, 
+    UserCollaborativeModel
+)
 
 class HybridModel:
     """
@@ -15,7 +21,10 @@ class HybridModel:
     """
     def __init__(
         self,
-        content_model: ContentSimilarityModel,
+        content_model: Union[
+            ContentSimilaritySBERTModel, 
+            ContentSimilarityTFIDFModel
+        ],
         item_collab_model: ItemItemCollaborativeModel,
         user_collab_model: UserCollaborativeModel,
         alpha: float,
