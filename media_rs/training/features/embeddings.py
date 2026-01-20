@@ -22,7 +22,7 @@ def compute_sbert_embeddings(
     """
     
     sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
-    return sbert_model, sbert_model.encode(item_texts, convert_to_numpy=True, normalize_embeddings=True)
+    return sbert_model, sbert_model.encode(item_texts, convert_to_numpy=True)
     
 
 def compute_tfidf_embeddings(

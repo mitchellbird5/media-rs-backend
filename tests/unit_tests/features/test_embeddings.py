@@ -33,7 +33,7 @@ def test_compute_sbert_embeddings(mock_sbert):
     # Ensure embeddings shape matches input
     assert embeddings.shape == (2, 3)
     # Ensure encode was called
-    mock_model.encode.assert_called_once_with(texts, convert_to_numpy=True, normalize_embeddings=True)
+    mock_model.encode.assert_called_once_with(texts, convert_to_numpy=True)
 
 
 # -----------------------------
