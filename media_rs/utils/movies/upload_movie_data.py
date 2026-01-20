@@ -2,8 +2,10 @@ import os
 from pathlib import Path
 from huggingface_hub import login, upload_file
 
-HF_TOKEN = os.getenv("HF_TOKEN")
-REPO_ID = os.getenv("HF_REPO_ID")
+# HF_TOKEN = os.getenv("HF_TOKEN")
+# HF_REPO_ID = os.getenv("HF_REPO_ID")
+HF_TOKEN='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'
+HF_REPO_ID='mitchellbird5/media_rs'
 LOCAL_FOLDER = "data/movies/cache/"
 REPO_TYPE = "dataset"
 
@@ -27,4 +29,4 @@ def upload_folder_recursive(folder_path: str, repo_id: str, repo_type: str = "da
             new_prefix = f"{prefix}/{file_path.name}" if prefix else file_path.name
             upload_folder_recursive(str(file_path), repo_id, repo_type, prefix=new_prefix)
 
-upload_folder_recursive(LOCAL_FOLDER, REPO_ID, REPO_TYPE)
+upload_folder_recursive(LOCAL_FOLDER, HF_REPO_ID, REPO_TYPE)

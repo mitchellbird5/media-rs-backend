@@ -33,15 +33,21 @@ class MovieDataCache:
     _instance = None
 
     FILES_TO_DOWNLOAD = [
-        "faiss_index_users.index",
+        "tfidf/faiss_index_users.index",
+        "sbert/faiss_index_users.index",
         "user_item_matrix.npz",
-        "movies_item_embeddings.npy",
-        "movie_sbert_model",
+        "tfidf/item_embeddings.npy",
+        "sbert/item_embeddings.npy",
+        "sbert/sbert_model",
         "item_index.pkl",
-        "movies_item_topk_cf.pkl",
-        "movies_item_topk_content.pkl",
-        "movies_user_embeddings.npy",
-        "user_index.pkl"
+        "item_topk_cf.pkl",
+        "tfidf/item_topk_content.pkl",
+        "sbert/item_topk_content.pkl",
+        "tfidf/user_embeddings.npy",
+        "sbert/user_embeddings.npy",
+        "user_index.pkl",
+        "tfidf/tfidf_vectorizer.pkl",
+        "tfidf/svd.pkl"
     ]
 
     def __new__(cls, repo_id: str = None, local_dir: str = None):
@@ -131,7 +137,7 @@ class MovieDataCache:
                 return pickle.load(f)
         elif filename.endswith(".index"):
             return load_faiss_index(str(path))
-        elif "sbert" in str(filename):
+        elif filename == "sbert/sbert_model":
             return SentenceTransformer(str(path))
         else:
             # fallback: return Path object
