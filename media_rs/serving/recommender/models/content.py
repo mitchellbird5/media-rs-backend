@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 from media_rs.rs_types.model import IdType, ContentSimilarity
 
 
-class ContentSimilarityModel:
+class ContentSimilaritySBERTModel:
     """
     Recommendation system model based on content similarity.
     """
@@ -85,4 +85,74 @@ class ContentSimilarityModel:
         # Top-N indices
         top_indices = np.argsort(-sims)[:top_n]
         
+        return [(int(i), float(sims[i])) for i in top_indices]
+    
+class ContentSimilarityTFIDFModel:
+    """
+    Recommendation system model based on TF-IDF + SVD content similarity.
+    """
+    def __init__(
+        self,
+        topk_graph: Dict[int, List[Tuple[int, float]]],
+        embeddings: np.ndarray,
+        vectorizer: TfidfVectorizer,
+        svd: TruncatedSVD,
+    ):
+        """
+        Initialisation
+
+        Args:
+            topk_graph (Dict[int, List[ContentSimilarity]]):
+                Top K most similar neighbours of each item
+
+            embeddings (np.ndarray):
+                Item embedding matrix of shape (num_items, embedding_dim),
+                where each row represents an item in a latent vector space.
+
+            vectorizer (TfidfVectorizer):
+                Fitted TF-IDF vectorizer
+
+            svd (TruncatedSVD):
+                Fitted SVD model used to project TF-IDF vectors
+        """
+        self.topk_graph = topk_graph
+        self.embeddings = embeddings
+        self.vectorizer = vectorizer
+        self.svd = svd
+
+    def recommend(
+        self,
+        item_id: IdType,
+        top_n: int
+    ) -> List[ContentSimilarity]:
+        """
+        Recommend n most similar items for item_id
+        """
+        return self.topk_graph[item_id][:top_n]
+
+    def recommend_from_description(
+        self,
+        description: str,
+        top_n: int
+    ) -> List[ContentSimilarity]:
+        """
+        Recommend n most similar items based on free-text description
+        """
+
+        # ---- TF-IDF → SVD ----
+        tfidf = self.vectorizer.transform([description])      # (1, vocab)
+        emb = self.svd.transform(tfidf).astype(np.float32)   # (1, dim)
+
+        # ---- Normalize for cosine similarity ----
+        norm = np.linalg.norm(emb)
+        if norm > 0:
+            emb /= norm
+
+        # ---- Cosine similarity ----
+        sims = emb @ self.embeddings.T
+        sims = sims.ravel()
+
+        # ---- Top-N ----
+        top_indices = np.argsort(-sims)[:top_n]
+
         return [(int(i), float(sims[i])) for i in top_indices]

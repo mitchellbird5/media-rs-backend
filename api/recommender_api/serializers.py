@@ -12,6 +12,10 @@ class UserCFInputSerializer(serializers.Serializer):
     ratings = RatingSerializer(many=True)
     top_n = serializers.IntegerField(default=10, min_value=1)
     k_similar_users = serializers.IntegerField(default=50, min_value=1)
+    embedding_method = serializers.ChoiceField(
+        choices=["SBERT", "TFIDF"],
+        default="SBERT"
+    )
     
     
 class HybridInputSerializer(serializers.Serializer):
@@ -21,6 +25,10 @@ class HybridInputSerializer(serializers.Serializer):
     ratings = RatingSerializer(many=True)
     top_n = serializers.IntegerField(default=10, min_value=1)
     k_similar_users = serializers.IntegerField(default=50, min_value=1)
+    embedding_method = serializers.ChoiceField(
+        choices=["SBERT", "TFIDF"],
+        default="SBERT"
+    )
     
     def validate(self, attrs):
         alpha = attrs.get("alpha", 0)
@@ -37,10 +45,18 @@ class HybridInputSerializer(serializers.Serializer):
 class ContentRecommendationInputSerializer(serializers.Serializer):
     movie_title = serializers.CharField()
     top_n = serializers.IntegerField(default=10, min_value=1, max_value=100)
+    embedding_method = serializers.ChoiceField(
+        choices=["SBERT", "TFIDF"],
+        default="SBERT"
+    )
     
 class ContentDescriptionInputSerializer(serializers.Serializer):
     description = serializers.CharField()
     top_n = serializers.IntegerField(default=10, min_value=1, max_value=100)
+    embedding_method = serializers.ChoiceField(
+        choices=["SBERT", "TFIDF"],
+        default="SBERT"
+    )
     
 class MovieSearchInputSerializer(serializers.Serializer):
     query = serializers.CharField()

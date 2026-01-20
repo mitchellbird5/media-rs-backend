@@ -28,11 +28,17 @@ from api.recommender_api.services.database_query import MoviesService
 
 
 from media_rs.utils.session import get_or_create_session_id
-
+from media_rs.rs_types.model import EmbeddingMethod
 
 # -----------------------------
 # Content-based
 # -----------------------------
+def get_embedding_method(method: str) -> EmbeddingMethod:
+    if method == "SBERT":
+        return EmbeddingMethod.SBERT
+    if method == "TFIDF":
+       return EmbeddingMethod.TFIDF
+
 class ContentRecommendationAPI(APIView):
     def get(self, request):
         serializer = ContentRecommendationInputSerializer(data=request.query_params)
@@ -42,11 +48,14 @@ class ContentRecommendationAPI(APIView):
         data = serializer.validated_data
         movie_title = data.get("movie_title")
         top_n = data["top_n"]
+        method_input = data["embedding_method"]
+        
+        method = get_embedding_method(method_input)
 
         if not movie_title:
             return Response({"error": "movie_title parameter required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        recs = get_content_recommendations(movie_title, top_n)
+        recs = get_content_recommendations(movie_title, method, top_n)
         return Response(recs)
 
 
@@ -62,11 +71,14 @@ class ContentDescriptionRecommendationAPI(APIView):
         data = serializer.validated_data
         description = data.get("description")
         top_n = data["top_n"]
+        method_input = data["embedding_method"]
+        
+        method = get_embedding_method(method_input)
 
         if not description:
             return Response({"error": "description parameter required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        recs = get_content_recommendations_from_description(description, top_n)
+        recs = get_content_recommendations_from_description(description, method, top_n)
 
         return Response(recs)
 
@@ -104,12 +116,16 @@ class UserCFRecommendationAPI(APIView):
         ratings = data["ratings"]
         top_n = data["top_n"]
         k_similar_users = data["k_similar_users"]
+        method_input = data["embedding_method"]
+        
+        method = get_embedding_method(method_input)
 
         try:
             recs = get_user_cf_recommendations(
                 ratings=ratings,
                 top_n=top_n,
-                k_similar_users=k_similar_users
+                k_similar_users=k_similar_users,
+                method=method
             )
         except Exception as e:
             return Response(
@@ -132,6 +148,9 @@ class HybridRecommendationAPI(APIView):
         ratings = data["ratings"]
         top_n = data["top_n"]
         k_similar_users = data["k_similar_users"]
+        method_input = data["embedding_method"]
+        
+        method = get_embedding_method(method_input)
 
         try:
             recs = get_hybrid_recommendations(
@@ -152,7 +171,7 @@ class HybridRecommendationAPI(APIView):
     
 class MovieSearchView(APIView):
     def get(self, request):
-        params = request.query_params.copy()  # preserve MultiValueDict
+        params = request.query_params.copy()
 
         # Coerce 'limit' to int if present
         limit = params.get("limit")
@@ -199,6 +218,8 @@ class MovieDataView(APIView):
             )
 
         try:
+            
+            
             data = get_multiple_movie_data(titles)
             data_dict = [d.__dict__ for d in data]
             return Response(data_dict)

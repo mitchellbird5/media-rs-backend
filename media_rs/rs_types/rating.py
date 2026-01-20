@@ -15,14 +15,10 @@ def get_index_ratings(
         rating = r["value"]
 
         # title -> movieIds -> indices
-        indices = item_idx.title_to_idx(title)
+        idx = item_idx.title_to_idx(title)
 
-        if not indices:
+        if not idx:
             continue
-
-        # If multiple movies share the same title:
-        # choose the first one (or apply your own rule)
-        idx = indices[0]
 
         index_ratings[idx] = rating
         
