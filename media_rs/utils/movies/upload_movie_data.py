@@ -2,10 +2,8 @@ import os
 from pathlib import Path
 from huggingface_hub import login, upload_file
 
-# HF_TOKEN = os.getenv("HF_TOKEN")
-# HF_REPO_ID = os.getenv("HF_REPO_ID")
-HF_TOKEN='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'
-HF_REPO_ID='mitchellbird5/media_rs'
+HF_TOKEN = os.getenv("HF_TOKEN")
+HF_REPO_ID = os.getenv("HF_REPO_ID")
 LOCAL_FOLDER = "data/movies/cache/"
 REPO_TYPE = "dataset"
 
