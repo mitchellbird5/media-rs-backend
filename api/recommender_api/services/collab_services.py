@@ -10,7 +10,6 @@ from media_rs.rs_types.model import EmbeddingMethod
 
 def get_item_cf_recommendations(
     movie_title: str,
-    method: EmbeddingMethod,
     top_n: int = 10
 ) -> List[str]:
     cache = get_movie_data_cache()
