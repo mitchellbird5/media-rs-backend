@@ -40,23 +40,20 @@ def test_compute_sbert_embeddings(mock_sbert):
 # Test compute_tfidf_embeddings
 # -----------------------------
 def test_compute_tfidf_embeddings_default():
-    texts = [
-        "Hello world",
-        "Hello test",
-        "Another hello"
-    ]
+    texts = ["Hello world", "Test sentence", "Another text"]
+    embeddings, vectorizer, svd = compute_tfidf_embeddings(texts, n_features=10, n_components=2)
 
-    embeddings, vectorizer, svd = compute_tfidf_embeddings(
-        texts, n_features=10, n_components=2
-    )
-
+    # Check types
     assert isinstance(embeddings, np.ndarray)
     assert isinstance(vectorizer, TfidfVectorizer)
     assert isinstance(svd, TruncatedSVD)
+
+    # Check shapes
     assert embeddings.shape == (3, 2)
+
+    # Check that TFIDF vectorizer learned vocabulary
     assert hasattr(vectorizer, "vocabulary_")
     assert len(vectorizer.vocabulary_) <= 10
-
 
 
 def test_compute_tfidf_embeddings_with_existing_vectorizer_svd():

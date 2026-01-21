@@ -54,12 +54,7 @@ def compute_tfidf_embeddings(
     """
 
     if vectorizer is None:
-        vectorizer = TfidfVectorizer(
-            max_features=n_features,
-            ngram_range=(1, 2),
-            stop_words="english",
-            min_df=2
-        )
+        vectorizer = TfidfVectorizer(max_features=n_features)
         tfidf_matrix = vectorizer.fit_transform(item_texts)
     else:
         tfidf_matrix = vectorizer.transform(item_texts)
