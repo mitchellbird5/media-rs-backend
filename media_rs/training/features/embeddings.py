@@ -54,7 +54,12 @@ def compute_tfidf_embeddings(
     """
 
     if vectorizer is None:
-        vectorizer = TfidfVectorizer(max_features=n_features)
+        vectorizer = TfidfVectorizer(
+            max_features=n_features,
+            ngram_range=(1, 2),
+            stop_words="english",
+            min_df=2
+        )
         tfidf_matrix = vectorizer.fit_transform(item_texts)
     else:
         tfidf_matrix = vectorizer.transform(item_texts)
@@ -65,7 +70,10 @@ def compute_tfidf_embeddings(
     else:
         embeddings = svd.transform(tfidf_matrix)
     
-    return np.asarray(embeddings, dtype=np.float32), vectorizer, svd
+    embeddings = np.asarray(embeddings, dtype=np.float32)
+    faiss.normalize_L2(embeddings)
+    
+    return embeddings, vectorizer, svd
 
 
 def compute_user_embeddings(
