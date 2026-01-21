@@ -106,7 +106,6 @@ def build_topk_content(
 
     # Normalize embeddings for cosine similarity
     item_embeddings = item_embeddings.astype(np.float32, copy=False)
-    faiss.normalize_L2(item_embeddings)
 
     index = faiss.IndexFlatIP(dim)
     index.add(item_embeddings)
