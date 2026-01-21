@@ -8,14 +8,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: dev
     expose:
       - 8000
       - 5678
     environment:
       DJANGO_SETTINGS_MODULE: api.api_project.settings
-      PYTHONUNBUFFERED: "1"
-
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DEBUG: "1"
+
       HF_TOKEN: ${HF_TOKEN}
       HF_REPO_ID: ${HF_REPO_ID}
       SUPABASE_URL: ${SUPABASE_URL}
@@ -23,6 +24,7 @@ services:
       SUPABASE_TABLE: ${SUPABASE_TABLE}
       TMDB_KEY: ${TMDB_KEY}
       CACHE_FOLDER: ${CACHE_FOLDER}
+      ALLOWED_HOST: ${ALLOWED_HOSTS_DEV}
 
     networks:
       - media-rs-network
