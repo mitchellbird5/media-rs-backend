@@ -60,7 +60,6 @@ class HybridModel:
         self,
         item_idx: int,
         ratings: Dict[int, float],
-        item_embeddings: np.ndarray,
         k_similar_users: int,
         top_n: int
     ) -> List[ContentSimilarity]:

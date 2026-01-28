@@ -32,12 +32,9 @@ def get_hybrid_recommendations(
         beta
     )
     
-    item_embeddings = get_hybrid_embeddings(cache, method)
-    
     recommendations = rs.recommend(
         item_idx.title_to_idx(movie_title), 
         index_ratings,
-        item_embeddings,
         k_similar_users,
         top_n,
     )
