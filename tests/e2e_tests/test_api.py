@@ -9,6 +9,7 @@ def api_client():
 @pytest.mark.django_db
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
 def test_content_api_e2e(api_client: APIClient, embedding_method):
+    print("Running test_content_api_e2e")
     url = "/api/recommend/content/"
     response = api_client.get(
         url,

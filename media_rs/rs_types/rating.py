@@ -17,9 +17,6 @@ def get_index_ratings(
         # title -> movieIds -> indices
         idx = item_idx.title_to_idx(title)
 
-        if not idx:
-            continue
-
         index_ratings[idx] = rating
         
     return index_ratings
