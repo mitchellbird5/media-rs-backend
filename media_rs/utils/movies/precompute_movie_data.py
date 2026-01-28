@@ -17,7 +17,7 @@ from media_rs.utils.load_data import save_pickle, save_numpy, save_faiss_index
 
 save_dir = Path("data/movies/cache/")
 file_dir = Path("data/movies/raw/ml-latest/")
-# save_dir = Path("data/movies/raw/ml-latest-small/cache/")
+# save_dir = Path("data/movies/raw/ml-latest-small/cache/tfidf_simple_year_incl_norm")
 # file_dir = Path("data/movies/raw/ml-latest-small/")
 
 sbert_dir = save_dir / "sbert"

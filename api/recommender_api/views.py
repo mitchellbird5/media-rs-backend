@@ -159,7 +159,8 @@ class HybridRecommendationAPI(APIView):
                 alpha=alpha,
                 beta=beta,
                 top_n=top_n,
-                k_similar_users=k_similar_users
+                k_similar_users=k_similar_users,
+                method=method
             )
         except Exception as e:
             return Response(

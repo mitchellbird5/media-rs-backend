@@ -59,7 +59,7 @@ class HybridModel:
     def recommend(
         self,
         item_idx: int,
-        new_user_ratings: Dict[int, float],
+        ratings: Dict[int, float],
         item_embeddings: np.ndarray,
         k_similar_users: int,
         top_n: int
@@ -71,7 +71,7 @@ class HybridModel:
             item_idx (int): 
                 ID of item to compare in content similarity model
             
-            new_user_ratings (Dict[int, float]): 
+            ratings (Dict[int, float]): 
                 Ratings of movies to use in 
                 user-user collaborative filtering.
             
@@ -99,8 +99,7 @@ class HybridModel:
 
         # 3. User-user CF scores using new user ratings
         user_scores = dict(self.user_collab_model.recommend(
-            new_user_ratings=new_user_ratings, 
-            item_embeddings=item_embeddings, 
+            ratings=ratings, 
             top_n=top_n,
             k_similar_users=k_similar_users,
         ))

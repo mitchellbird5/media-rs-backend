@@ -16,7 +16,7 @@ class MockItemCollabModel:
         return [(1, 0.85), (2, 0.75), (3, 0.65)][:top_n]
 
 class MockUserCollabModel:
-    def recommend(self, new_user_ratings: Dict[int, float], item_embeddings: np.ndarray, top_n: int, k_similar_users: int) -> List[ContentSimilarity]:
+    def recommend(self, ratings: Dict[int, float], item_embeddings: np.ndarray, top_n: int, k_similar_users: int) -> List[ContentSimilarity]:
         return [(2, 0.95), (3, 0.6), (4, 0.5)][:top_n]
 
 
@@ -66,14 +66,14 @@ def test_top_n(hybrid_model: HybridModel):
 
 
 def test_recommend(hybrid_model: HybridModel):
-    new_user_ratings = {0: 5.0, 1: 3.0}
+    ratings = {0: 5.0, 1: 3.0}
     item_embeddings = np.random.rand(5, 3).astype(np.float32)
     top_n = 3
     k_similar_users = 2
 
     results = hybrid_model.recommend(
         item_idx=0,
-        new_user_ratings=new_user_ratings,
+        ratings=ratings,
         item_embeddings=item_embeddings,
         k_similar_users=k_similar_users,
         top_n=top_n

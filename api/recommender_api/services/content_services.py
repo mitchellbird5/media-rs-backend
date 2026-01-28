@@ -36,4 +36,3 @@ def get_content_recommendations_from_description(
     
     recommendations = rs_content.recommend_from_description(description, top_n)
     return [item_idx.idx_to_title(r[0]) for r in recommendations]
-

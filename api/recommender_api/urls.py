@@ -4,6 +4,7 @@ from .views import (
     ContentDescriptionRecommendationAPI,
     ItemCFRecommendationAPI,
     UserCFRecommendationAPI,
+    HybridRecommendationAPI,
     MovieSearchView,
     MovieDataView
 )
@@ -31,7 +32,7 @@ urlpatterns = [
     ),
     path(
         "recommend/hybrid/", 
-        UserCFRecommendationAPI.as_view(), 
+        HybridRecommendationAPI.as_view(), 
         name="hybrid-recommend"
     ),
     path(
