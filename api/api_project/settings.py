@@ -42,6 +42,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "api.recommender_api.apps.MediaRSConfig",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
