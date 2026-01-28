@@ -176,4 +176,5 @@ def get_movie_data_cache(local_dir: Optional[str] = None) -> MovieDataCache:
             repo_id=None if local_dir else HF_REPO,
             local_dir=local_dir,
         )
+        _CACHE.warmup()
     return _CACHE
