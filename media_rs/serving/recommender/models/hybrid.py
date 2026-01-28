@@ -2,11 +2,17 @@
 import pandas as pd
 import numpy as np
 
-from typing import List, Dict
+from typing import List, Dict, Union
 from media_rs.rs_types.model import ContentSimilarity
 
-from media_rs.serving.recommender.models.content import ContentSimilarityModel
-from media_rs.serving.recommender.models.collab import ItemItemCollaborativeModel, UserCollaborativeModel
+from media_rs.serving.recommender.models.content import (
+    ContentSimilaritySBERTModel,
+    ContentSimilarityTFIDFModel
+)
+from media_rs.serving.recommender.models.collab import (
+    ItemItemCollaborativeModel, 
+    UserCollaborativeModel
+)
 
 class HybridModel:
     """
@@ -15,7 +21,10 @@ class HybridModel:
     """
     def __init__(
         self,
-        content_model: ContentSimilarityModel,
+        content_model: Union[
+            ContentSimilaritySBERTModel, 
+            ContentSimilarityTFIDFModel
+        ],
         item_collab_model: ItemItemCollaborativeModel,
         user_collab_model: UserCollaborativeModel,
         alpha: float,
@@ -50,8 +59,7 @@ class HybridModel:
     def recommend(
         self,
         item_idx: int,
-        new_user_ratings: Dict[int, float],
-        item_embeddings: np.ndarray,
+        ratings: Dict[int, float],
         k_similar_users: int,
         top_n: int
     ) -> List[ContentSimilarity]:
@@ -62,7 +70,7 @@ class HybridModel:
             item_idx (int): 
                 ID of item to compare in content similarity model
             
-            new_user_ratings (Dict[int, float]): 
+            ratings (Dict[int, float]): 
                 Ratings of movies to use in 
                 user-user collaborative filtering.
             
@@ -90,8 +98,7 @@ class HybridModel:
 
         # 3. User-user CF scores using new user ratings
         user_scores = dict(self.user_collab_model.recommend(
-            new_user_ratings=new_user_ratings, 
-            item_embeddings=item_embeddings, 
+            ratings=ratings, 
             top_n=top_n,
             k_similar_users=k_similar_users,
         ))

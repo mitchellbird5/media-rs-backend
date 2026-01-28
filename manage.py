@@ -7,10 +7,6 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.api_project.settings')
-    print("Preloading movie cache...")
-    from media_rs.utils.movies.movie_data_cache import get_movie_data_cache
-    get_movie_data_cache()
-    print("Movie cache loaded")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

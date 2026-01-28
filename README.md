@@ -1,0 +1,1 @@
+This repository uses data sourced from the University of Minnesota / the GroupLens Research Group. The Unviersity of Minessota andthe GroupLens Research Group are in ways affiliated or endorse this application. See https://files.grouplens.org/datasets/movielens/ml-latest-README.html for more details.

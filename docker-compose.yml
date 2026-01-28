@@ -1,10 +1,7 @@
 services:
-  media-rs-backend-dev:
-    container_name: media-rs-backend-dev
-    image: media-rs-backend-dev:latest
-    volumes:
-      - .:/app
-      - ./data/movies/raw/ml-latest/hf_cache:/root/.cache/huggingface
+  media-rs-backend:
+    container_name: media-rs-backend
+    image: media-rs/backend:latest
     build:
       context: .
       dockerfile: Dockerfile
