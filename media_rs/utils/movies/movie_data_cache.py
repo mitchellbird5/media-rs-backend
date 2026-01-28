@@ -131,6 +131,7 @@ class MovieDataCache:
     # ------------------------------------------------
 
     def get(self, filename: str):
+        print(f"Retrieving {filename}")
         if filename not in self.data:
             raise RuntimeError(
                 f"{filename} not loaded. Call warmup() first."
