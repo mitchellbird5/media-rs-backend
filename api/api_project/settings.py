@@ -29,10 +29,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    '127.0.0.1', 
     'localhost',
-    "172.29.191.90",
-    "0.0.0.0",
     "media-rs.test",
     "media-rs-backend-dev",  
     "media-rs-frontend-dev",
@@ -42,6 +39,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "api.recommender_api.apps.MediaRSConfig",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -1,13 +1,19 @@
+import numpy as np
+
 from media_rs.serving.recommender.models.hybrid import HybridModel
 from media_rs.utils.item_index import ItemIndex
 from media_rs.serving.recommender.build.build_collab_model import (
-    get_user_cf_model, 
-    get_item_cf_model
+    get_item_cf_model, 
+    get_user_cf_model
 )
 from media_rs.serving.recommender.build.build_content_model import get_content_similarity_model
+from media_rs.rs_types.model import EmbeddingMethod
+from media_rs.utils.movies.movie_data_cache import MovieDataCache
+
 
 def get_hybrid_model(
-    item_index: ItemIndex,
+    cache: MovieDataCache,
+    method: EmbeddingMethod,
     alpha: float,
     beta: float
 ) -> HybridModel:
@@ -21,9 +27,9 @@ def get_hybrid_model(
         HybridModel: Hybrid filter model
     """
     
-    content_model = get_content_similarity_model(item_index)
-    item_cf_model = get_item_cf_model(item_index)
-    user_cf_model = get_user_cf_model()
+    content_model = get_content_similarity_model(cache, method)
+    item_cf_model = get_item_cf_model(cache)
+    user_cf_model = get_user_cf_model(cache, method)
     
     return HybridModel(
         content_model=content_model,
@@ -32,3 +38,12 @@ def get_hybrid_model(
         alpha=alpha,
         beta=beta
     )
+    
+def get_hybrid_embeddings(
+    cache: MovieDataCache,
+    method: EmbeddingMethod
+) -> np.ndarray:
+    if method == EmbeddingMethod.SBERT:
+        return cache.get("sbert/item_embeddings.npy")
+    if method == EmbeddingMethod.TFIDF:
+        return cache.get("tfidf/item_embeddings.npy")

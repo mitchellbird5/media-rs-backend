@@ -5,10 +5,7 @@ def build_item_index(movies, links):
     movieId_to_idx = {mid: idx for idx, mid in idx_to_movieId.items()}
 
     movieId_to_title = dict(zip(movies["movieId"], movies["title"]))
-
-    title_to_movieId = {}
-    for mid, title in movieId_to_title.items():
-        title_to_movieId.setdefault(norm(title), []).append(mid)
+    title_to_movieId = {title: mid for mid, title in movieId_to_title.items()}
 
     movieId_to_imdbId = dict(zip(links["movieId"], links["imdbId"]))
     movieId_to_tmdbId = dict(zip(links["movieId"], links["tmdbId"]))

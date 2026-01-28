@@ -22,7 +22,7 @@ def compute_sbert_embeddings(
     """
     
     sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
-    return sbert_model, sbert_model.encode(item_texts, convert_to_numpy=True, normalize_embeddings=True)
+    return sbert_model, sbert_model.encode(item_texts, convert_to_numpy=True)
     
 
 def compute_tfidf_embeddings(
@@ -54,18 +54,41 @@ def compute_tfidf_embeddings(
     """
 
     if vectorizer is None:
-        vectorizer = TfidfVectorizer(max_features=n_features)
+        vectorizer = TfidfVectorizer(
+            max_features=n_features,
+            ngram_range=(1, 2),
+            stop_words="english",
+            min_df=2
+        )
         tfidf_matrix = vectorizer.fit_transform(item_texts)
     else:
         tfidf_matrix = vectorizer.transform(item_texts)
-        
+
+    n_features_actual = tfidf_matrix.shape[1]
+
     if svd is None:
-        svd = TruncatedSVD(n_components=n_components, random_state=42)
-        embeddings = svd.fit_transform(tfidf_matrix)
+        if n_features_actual == 0:
+            # No features at all
+            embeddings = np.zeros((len(item_texts), n_components), dtype=np.float32)
+            svd = None
+        else:
+            n_components_eff = min(n_components, n_features_actual)
+            svd = TruncatedSVD(n_components=n_components_eff, random_state=42)
+            embeddings = svd.fit_transform(tfidf_matrix)
+
+            # Pad to requested n_components
+            if n_components_eff < n_components:
+                pad_width = n_components - n_components_eff
+                embeddings = np.pad(embeddings, ((0,0),(0,pad_width)), mode="constant")
     else:
         embeddings = svd.transform(tfidf_matrix)
-    
-    return np.asarray(embeddings, dtype=np.float32), vectorizer, svd
+
+    embeddings = np.asarray(embeddings, dtype=np.float32)
+
+    # Normalize for cosine similarity
+    faiss.normalize_L2(embeddings)
+
+    return embeddings, vectorizer, svd
 
 
 def compute_user_embeddings(
