@@ -1,3 +1,5 @@
+import numpy as np
+
 from media_rs.serving.recommender.models.hybrid import HybridModel
 from media_rs.utils.item_index import ItemIndex
 from media_rs.serving.recommender.build.build_collab_model import (
@@ -36,3 +38,12 @@ def get_hybrid_model(
         alpha=alpha,
         beta=beta
     )
+    
+def get_hybrid_embeddings(
+    cache: MovieDataCache,
+    method: EmbeddingMethod
+) -> np.ndarray:
+    if method == EmbeddingMethod.SBERT:
+        return cache.get("sbert/item_embeddings.npy")
+    if method == EmbeddingMethod.TFIDF:
+        return cache.get("tfidf/item_embeddings.npy")

@@ -4,7 +4,7 @@ services:
     image: media-rs/backend-ci:latest
     volumes:
       - .:/app
-      - ${CACHE_FOLDER}:/root/.cache/huggingface
+      - ./data/movies/raw/ml-latest/hf_cache:/root/.cache/huggingface
     build:
       context: .
       dockerfile: Dockerfile
@@ -23,4 +23,5 @@ services:
       SUPABASE_TABLE: ${SUPABASE_TABLE}
       TMDB_KEY: ${TMDB_KEY}
       ALLOWED_HOST: ${ALLOWED_HOSTS_DEV}
+      CACHE_FOLDER: ${CACHE_FOLDER}
     
