@@ -6,14 +6,11 @@ from media_rs.utils.movies.movie_data_cache import get_movie_data_cache
 def api_client():
     return APIClient()
 
-@pytest.mark.django_db
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
-def test_content_api_e2e(api_client: APIClient, embedding_method):
-    print("Running test_content_api_e2e")
-    url = "/api/recommend/content/"
+def test_content_api_e2e(api_client, embedding_method):
     response = api_client.get(
-        url,
-        {
+        "/api/recommend/content",
+        params={
             "movie_title": "Toy Story (1995)",
             "top_n": 2,
             "embedding_method": embedding_method,
@@ -28,13 +25,11 @@ def test_content_api_e2e(api_client: APIClient, embedding_method):
 
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
-def test_content_description_api_e2e(api_client: APIClient, embedding_method):
-    url = "/api/recommend/content-description/"
+def test_content_description_api_e2e(api_client, embedding_method):
     response = api_client.get(
-        url,
-        {
+        "/api/recommend/content-description",
+        params={
             "description": "fun animated movie",
             "top_n": 2,
             "embedding_method": embedding_method,
@@ -49,20 +44,26 @@ def test_content_description_api_e2e(api_client: APIClient, embedding_method):
 
 
 
-@pytest.mark.django_db
-def test_item_cf_api_e2e(api_client: APIClient):
-    url = "/api/recommend/item-cf/"
-    response = api_client.get(url, {"movie_title": "Toy Story (1995)", "top_n": 2})
+
+def test_item_cf_api_e2e(api_client):
+    response = api_client.get(
+        "/api/recommend/item-cf",
+        params={
+            "movie_title": "Toy Story (1995)",
+            "top_n": 2,
+        },
+    )
+
     assert response.status_code == 200
     data = response.json()
+
     assert isinstance(data, list)
     assert len(data) != 0
 
 
-@pytest.mark.django_db
+
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
-def test_user_cf_api_e2e(api_client: APIClient, embedding_method):
-    url = "/api/recommend/user-cf/"
+def test_user_cf_api_e2e(api_client, embedding_method):
     payload = {
         "ratings": [
             {"name": "Toy Story 2 (1999)", "value": 5},
@@ -73,7 +74,10 @@ def test_user_cf_api_e2e(api_client: APIClient, embedding_method):
         "embedding_method": embedding_method,
     }
 
-    response = api_client.post(url, payload, format="json")
+    response = api_client.post(
+        "/api/recommend/user-cf",
+        json=payload,
+    )
 
     assert response.status_code == 200
     data = response.json()
@@ -83,10 +87,9 @@ def test_user_cf_api_e2e(api_client: APIClient, embedding_method):
 
 
 
-@pytest.mark.django_db
+
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
-def test_hybrid_api_e2e(api_client: APIClient, embedding_method):
-    url = "/api/recommend/hybrid/"
+def test_hybrid_api_e2e(api_client, embedding_method):
     payload = {
         "movie_title": "Toy Story (1995)",
         "ratings": [
@@ -100,7 +103,10 @@ def test_hybrid_api_e2e(api_client: APIClient, embedding_method):
         "embedding_method": embedding_method,
     }
 
-    response = api_client.post(url, payload, format="json")
+    response = api_client.post(
+        "/api/recommend/hybrid",
+        json=payload,
+    )
 
     assert response.status_code == 200
     data = response.json()
@@ -109,28 +115,34 @@ def test_hybrid_api_e2e(api_client: APIClient, embedding_method):
     assert len(data) != 0
 
 
+def test_movie_search_api_e2e(api_client):
+    response = api_client.get(
+        "/api/movies/search",
+        params={
+            "query": "Toy Story",
+            "limit": 5,
+        },
+    )
 
-@pytest.mark.django_db
-def test_movie_search_api_e2e(api_client: APIClient):
-    # Only load cache if needed (not strictly needed here if API doesn't use it)
-    # movie_cache = get_movie_data_cache()
-    
-    url = "/api/movies/search/"
-    response = api_client.get(url, {"query": "Toy Story", "limit": 5})
     assert response.status_code == 200
     data = response.json()
+
     assert isinstance(data, list)
-    assert len(data) == 5, "Expected at least one movie in the response"
+    assert len(data) == 5
 
     titles = [movie["title"] for movie in data]
-    assert any("Toy Story" in title for title in titles), "Expected 'Toy Story' in results"
+    assert any("Toy Story" in title for title in titles)
 
-@pytest.mark.django_db
-def test_movie_data_api_e2e(api_client: APIClient):
-    url = "/api/movies/data/"
+
+def test_movie_data_api_e2e(api_client):
     response = api_client.get(
-        url,
-        {"titles": ["Toy Story (1995)", "Forrest Gump (1994)"]},
+        "/api/movies/data",
+        params={
+            "titles": [
+                "Toy Story (1995)",
+                "Forrest Gump (1994)",
+            ]
+        },
     )
 
     assert response.status_code == 200
