@@ -1,9 +1,8 @@
 # serializers.py
-from typing import List, Union
-from pydantic import BaseModel, Field
+from typing import List, Literal
+from pydantic import BaseModel, Field, model_validator
 
-Embedding = Union['SBERT', 'TFIDF']
-
+Embedding = Literal["SBERT", "TFIDF"]
 # -----------------------------
 # Input models
 # -----------------------------
@@ -27,8 +26,8 @@ class ItemItemCFInput(BaseModel):
 
 class UserCFInput(BaseModel):
     ratings: List[Rating]
-    top_n: int = 10
-    k_similar_users: int = 50
+    top_n: int = Field(10, ge=1)
+    k_similar_users: int = Field(50, ge=1)
     embedding_method: Embedding = "SBERT"
 
 class HybridInput(BaseModel):
@@ -36,9 +35,15 @@ class HybridInput(BaseModel):
     alpha: float = Field(0.5, ge=0, le=1)
     beta: float = Field(0.3, ge=0, le=1)
     ratings: List[Rating]
-    top_n: int = 10
-    k_similar_users: int = 50
+    top_n: int = Field(10, ge=1)
+    k_similar_users: int = Field(50, ge=1)
     embedding_method: Embedding = "SBERT"
+
+    @model_validator(mode="after")
+    def check_alpha_beta(cls, model):
+        if model.alpha + model.beta > 1:
+            raise ValueError("alpha + beta must be <= 1")
+        return model
 
 class MovieSearchInput(BaseModel):
     query: str

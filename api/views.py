@@ -1,5 +1,5 @@
 # views.py
-from fastapi import APIRouter, HTTPException, Query, Request, Response
+from fastapi import APIRouter, HTTPException, Query, Request, Response, Body
 from typing import List
 from api.services.content_services import (
     get_content_recommendations,
@@ -21,7 +21,7 @@ from .serializers import (
     UserCFInput,
     HybridInput,
     MovieSearchInput,
-    RecommendationListOutput,
+    RecommendationListOutput
 )
 
 # -----------------------------
@@ -45,52 +45,46 @@ def get_embedding_method(method: str) -> EmbeddingMethod:
 # -----------------------------
 # Endpoints
 # -----------------------------
-@router.get("/recommend/content", response_model=RecommendationListOutput)
+@router.get("/recommend/content", response_model=List[str])
 def content_recommendation(
     movie_title: str = Query(...),
     top_n: int = Query(10, ge=1),
     embedding_method: str = Query("SBERT")
 ):
     method = get_embedding_method(embedding_method)
-    recs = get_content_recommendations(movie_title, method, top_n)
-    return {"recommendations": recs}
+    return get_content_recommendations(movie_title, method, top_n)
 
-@router.get("/recommend/content-description", response_model=RecommendationListOutput)
+@router.get("/recommend/content-description", response_model=List[str])
 def content_description_recommendation(
     description: str = Query(...),
     top_n: int = Query(10, ge=1),
     embedding_method: str = Query("SBERT")
 ):
     method = get_embedding_method(embedding_method)
-    recs = get_content_recommendations_from_description(description, method, top_n)
-    return {"recommendations": recs}
+    return get_content_recommendations_from_description(description, method, top_n)
 
-@router.get("/recommend/item-cf", response_model=RecommendationListOutput)
+@router.get("/recommend/item-cf", response_model=List[str])
 def item_cf_recommendation(
     movie_title: str = Query(...),
     top_n: int = Query(10, ge=1)
 ):
-    recs = get_item_cf_recommendations(movie_title, top_n)
-    return {"recommendations": recs}
+    return get_item_cf_recommendations(movie_title, top_n)
 
-@router.post("/recommend/user-cf", response_model=RecommendationListOutput)
-def user_cf_recommendation(input: UserCFInput):
-    method = get_embedding_method(input.embedding_method)
+@router.post("/recommend/user-cf", response_model=List[str])
+def user_cf_recommendation(payload: UserCFInput = Body(...)):
+    method = get_embedding_method(payload.embedding_method)
     try:
-        recs = get_user_cf_recommendations(
-            ratings=[r.dict() for r in input.ratings],
-            top_n=input.top_n,
-            k_similar_users=input.k_similar_users,
+        return get_user_cf_recommendations(
+            ratings=[r.dict() for r in payload.ratings],
+            top_n=payload.top_n,
+            k_similar_users=payload.k_similar_users,
             method=method
         )
-        return {"recommendations": recs}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/recommend/hybrid", response_model=RecommendationListOutput)
+    
+@router.post("/recommend/hybrid", response_model=List[str])
 def hybrid_recommendation(input: HybridInput):
-    if input.alpha + input.beta > 1:
-        raise HTTPException(status_code=400, detail="alpha + beta must be <= 1")
     method = get_embedding_method(input.embedding_method)
     try:
         recs = get_hybrid_recommendations(
@@ -102,25 +96,38 @@ def hybrid_recommendation(input: HybridInput):
             k_similar_users=input.k_similar_users,
             method=method
         )
-        return {"recommendations": recs}
+        return recs
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/movies/search")
 def movie_search(
-    request: Request,
-    response: Response,
-    query: str = Query(...),
-    limit: int = Query(10, ge=1, le=100)
+    query: str,
+    limit: int = Query(10, ge=1, le=100),
 ):
+    """
+    Search movies by title.
+    Automatically sets a session cookie if missing.
+    """
+    response = Response()
+
     try:
-        session_id = get_or_create_session_id(request, response)
+        # Get session_id from cookie, or create a new one
+        sid = get_or_create_session_id(
+            response, sid=None
+        )
+
         results = MoviesService.search_movies(
             query=query,
-            user_key=f"session:{session_id}",
+            user_key=f"session:{sid}",
             limit=limit
         )
-        return {"results": results}
+
+        # Return results as JSON with the cookie set
+        response.media_type = "application/json"
+        response.body = results.json().encode() if hasattr(results, "json") else str(results).encode()
+        return results
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
