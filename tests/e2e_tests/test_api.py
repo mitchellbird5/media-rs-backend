@@ -1,10 +1,10 @@
 import pytest
-from rest_framework.test import APIClient
-from media_rs.utils.movies.movie_data_cache import get_movie_data_cache
+from fastapi.testclient import TestClient
+from api.app import app
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def api_client():
-    return APIClient()
+    return TestClient(app)
 
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
 def test_content_api_e2e(api_client, embedding_method):
