@@ -53,8 +53,7 @@ COPY media_rs ./media_rs
 # Install only production deps
 RUN poetry install --no-interaction --no-ansi --only main
 
-# Copy remaining files (manage.py, etc.)
 COPY api ./api
 
 # Gunicorn WSGI server
-CMD ["gunicorn", "api.api_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
