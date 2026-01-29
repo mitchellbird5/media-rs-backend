@@ -4,7 +4,7 @@ emoji: 🦀
 colorFrom: blue
 colorTo: gray
 sdk: docker
-app_port: 7860
+app_port: 8080
 sdk_version: 6.5.0
 app_file: api/app.py
 pinned: false

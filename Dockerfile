@@ -52,4 +52,4 @@ COPY api ./api
 RUN poetry install --no-interaction --no-ansi --only main
 
 # Gunicorn WSGI server
-CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8080"]
