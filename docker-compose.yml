@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
       target: prod
     expose:
-      - 8000
+      - 7860
     environment:
       HF_TOKEN: ${HF_TOKEN}
       HF_REPO_ID: ${HF_REPO_ID}

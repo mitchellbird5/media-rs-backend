@@ -23,7 +23,7 @@ WORKDIR /app
 ENV PYTHONPATH=/app
 
 # Copy dependency files first (better cache)
-COPY pyproject.toml poetry.lock* README.md ./
+COPY pyproject.toml poetry.lock* README.md requirements.txt ./
 
 # =====================================================
 # Dev stage
@@ -44,16 +44,12 @@ CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "manage.py", "runser
 # =====================================================
 FROM base AS prod
 
-# Copy dependency files first
-COPY pyproject.toml poetry.lock* README.md requirements.txt ./
-
 # Copy app code (so Poetry can find the package)
 COPY media_rs ./media_rs
+COPY api ./api
 
 # Install only production deps
 RUN poetry install --no-interaction --no-ansi --only main
-
-COPY api ./api
 
 # Gunicorn WSGI server
 CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "7860"]
