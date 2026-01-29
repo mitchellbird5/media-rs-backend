@@ -12,10 +12,6 @@ services:
       - 8000
       - 5678
     environment:
-      DJANGO_SETTINGS_MODULE: api.api_project.settings
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DEBUG: "0"
-
       HF_TOKEN: ${HF_TOKEN}
       HF_REPO_ID: ${HF_REPO_ID}
       SUPABASE_URL: ${SUPABASE_URL}
@@ -23,5 +19,3 @@ services:
       SUPABASE_TABLE: ${SUPABASE_TABLE}
       TMDB_KEY: ${TMDB_KEY}
       ALLOWED_HOST: ${ALLOWED_HOSTS_DEV}
-      CACHE_FOLDER: ${CACHE_FOLDER}
-    
