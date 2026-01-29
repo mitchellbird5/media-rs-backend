@@ -13,9 +13,10 @@ services:
       - 8000
       - 5678
     environment:
+      ENVIRONMENT: development
       DJANGO_SETTINGS_MODULE: api.api_project.settings
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DEBUG: "1"
+      DJANGO_ALLOWED_HOSTS: ${ALLOWED_HOSTS_DEV}
 
       HF_TOKEN: ${HF_TOKEN}
       HF_REPO_ID: ${HF_REPO_ID}

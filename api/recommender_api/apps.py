@@ -2,7 +2,8 @@ import os
 from django.apps import AppConfig
 
 class MediaRSConfig(AppConfig):
-    name = "media_rs"
+    name = "api.recommender_api"
+    label = "recommender_api"
 
     def ready(self):
         # Only warmup in the child server, skip autoreload parent

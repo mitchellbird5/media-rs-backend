@@ -13,6 +13,7 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     build-essential \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
@@ -43,11 +44,18 @@ CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "manage.py", "runser
 # =====================================================
 FROM base AS prod
 
+# Copy dependency files first
+COPY pyproject.toml poetry.lock* README.md ./
+
+# Copy app code (so Poetry can find the package)
+COPY media_rs ./media_rs
+
 # Install only production deps
 RUN poetry install --no-interaction --no-ansi --only main
 
-# Copy app code
-COPY . .
+# Copy remaining files (manage.py, etc.)
+COPY manage.py ./ 
+COPY api ./api
 
-# Gunicorn (WSGI)
-CMD ["gunicorn", "api_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2"]
+# Gunicorn WSGI server
+CMD ["gunicorn", "api.api_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2"]
