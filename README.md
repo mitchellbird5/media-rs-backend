@@ -3,9 +3,10 @@ title: MediaRS
 emoji: 🦀
 colorFrom: blue
 colorTo: gray
-sdk: gradio
+sdk: docker
+app_port: 7860
 sdk_version: 6.5.0
-app_file: app.py
+app_file: api/app.py
 pinned: false
 license: mit
 short_description: MediaRS Backend
