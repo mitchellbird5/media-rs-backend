@@ -1,1 +1,14 @@
-This repository uses data sourced from the University of Minnesota / the GroupLens Research Group. The Unviersity of Minessota andthe GroupLens Research Group are in ways affiliated or endorse this application. See https://files.grouplens.org/datasets/movielens/ml-latest-README.html for more details.
+---
+title: MediaRS
+emoji: 🦀
+colorFrom: blue
+colorTo: gray
+sdk: gradio
+sdk_version: 6.5.0
+app_file: app.py
+pinned: false
+license: mit
+short_description: MediaRS Backend
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
