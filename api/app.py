@@ -6,6 +6,10 @@ from api.views import router
 
 app = FastAPI(title="Media Recommender API")
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "MediaRS"}
+
 if os.getenv("ENVIRONMENT") == "production":
     origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 else:
