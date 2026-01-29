@@ -9,9 +9,15 @@ services:
     expose:
       - 8000
     environment:
+      ENVIRONMENT: production
       DJANGO_SETTINGS_MODULE: api.api_project.settings
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-      DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: ${ALLOWED_HOSTS_PROD}
+      CORS_ALLOWED_ORIGINS: ${FRONTEND_URL}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
 
       HF_TOKEN: ${HF_TOKEN}
       HF_REPO_ID: ${HF_REPO_ID}

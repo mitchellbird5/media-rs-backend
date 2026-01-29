@@ -14,30 +14,49 @@ import sys
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ------------------------------------------------------------------------------
+# Core paths
+# ------------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.append(str(BASE_DIR))  # now Python can import media_rs
 
+# ------------------------------------------------------------------------------
+# Environment
+# ------------------------------------------------------------------------------
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
+IS_PROD = ENVIRONMENT == "production"
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# ------------------------------------------------------------------------------
+# Security
+# ------------------------------------------------------------------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+if IS_PROD and not SECRET_KEY:
+    raise RuntimeError("DJANGO_SECRET_KEY must be set in production")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "0") == "1"
+DEBUG = not IS_PROD
 
-ALLOWED_HOSTS = [
-    'localhost',
-    "media-rs.test",
-    "media-rs-backend-dev",  
-    "media-rs-frontend-dev",
-]
+ALLOWED_HOSTS = (os.getenv("DJANGO_ALLOWED_HOSTS", "").split(","))
+
+# ------------------------------------------------------------------------------
+# HTTPS / Proxy (Railway / Render / Nginx)
+# ------------------------------------------------------------------------------
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+SESSION_COOKIE_SECURE = IS_PROD
+CSRF_COOKIE_SECURE = IS_PROD
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+
+if IS_PROD:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 
-# Application definition
-
+# ------------------------------------------------------------------------------
+# Applications
+# ------------------------------------------------------------------------------
 INSTALLED_APPS = [
     "api.recommender_api.apps.MediaRSConfig",
     'django.contrib.admin',
@@ -47,11 +66,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    # 'corsheaders'
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
-    # "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,12 +81,25 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # open API for now
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny"
+        if not IS_PROD
+        else "rest_framework.permissions.IsAuthenticated"
     ]
 }
 
-ROOT_URLCONF = 'api_project.urls'
+if IS_PROD:
+    CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+else:
+    CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+# ------------------------------------------------------------------------------
+# URLs / WSGI
+# ------------------------------------------------------------------------------
+ROOT_URLCONF = "api.api_project.urls"
+WSGI_APPLICATION = "api.api_project.wsgi.application"
 
 TEMPLATES = [
     {
@@ -87,15 +119,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'api_project.wsgi.application'
 
 
+# ------------------------------------------------------------------------------
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# ------------------------------------------------------------------------------
+if IS_PROD:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB"),
+            "USER": os.getenv("POSTGRES_USER"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "HOST": os.getenv("POSTGRES_HOST"),
+            "PORT": os.getenv("POSTGRES_PORT", "5432"),
+            "CONN_MAX_AGE": 60,
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -132,7 +177,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
