@@ -45,7 +45,7 @@ CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "manage.py", "runser
 FROM base AS prod
 
 # Copy dependency files first
-COPY pyproject.toml poetry.lock* README.md ./
+COPY pyproject.toml poetry.lock* README.md requirements.txt ./
 
 # Copy app code (so Poetry can find the package)
 COPY media_rs ./media_rs
@@ -54,7 +54,6 @@ COPY media_rs ./media_rs
 RUN poetry install --no-interaction --no-ansi --only main
 
 # Copy remaining files (manage.py, etc.)
-COPY manage.py ./ 
 COPY api ./api
 
 # Gunicorn WSGI server
