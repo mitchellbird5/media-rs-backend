@@ -134,7 +134,7 @@ def hybrid_recommendation(input: HybridInput):
 
 @router.get("/medium/search")
 def medium_search(
-    media: str,
+    medium: str,
     query: str,
     limit: int = Query(10, ge=1, le=100),
 ):
@@ -144,7 +144,7 @@ def medium_search(
     """
     response = Response()
     
-    medium = get_medium(media)
+    mediumEnum = get_medium(medium)
 
     try:
         # Get session_id from cookie, or create a new one
@@ -155,7 +155,7 @@ def medium_search(
         results = DatabaseService.search_database(
             query=query,
             user_key=f"session:{sid}",
-            medium=medium,
+            medium=mediumEnum,
             limit=limit
         )
 
