@@ -5,9 +5,9 @@ from typing import List, Dict, Any
 from media_rs.utils.rate_limit import RateLimiter
 from media_rs.rs_types.model import Medium
 
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY") 
@@ -44,21 +44,12 @@ class DatabaseService:
             # Fail fast – don't hit Supabase
             raise Exception("Rate limit exceeded")
 
-        print("medium =", medium)
-        print("SUPABASE_MOVIE_TABLE =", SUPABASE_MOVIE_TABLE)
-        print("SUPABASE_BOOK_TABLE =", SUPABASE_BOOK_TABLE)
-
         if medium == Medium.MOVIES:
-            print('Setting table to ', SUPABASE_MOVIE_TABLE)
             table = SUPABASE_MOVIE_TABLE
         elif medium == Medium.BOOKS:
-            print('Setting table to ', SUPABASE_BOOK_TABLE)
             table = SUPABASE_BOOK_TABLE
         else:
-            print('Invalid medium:', medium)
             raise ValueError("Invalid medium")
-
-        print('table =', table)
 
         try:
             response = (

@@ -18,7 +18,8 @@ jobs:
       DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-      SUPABASE_TABLE: ${{ secrets.SUPABASE_TABLE }}
+      SUPABASE_MOVIE_TABLE: ${{ secrets.SUPABASE_MOVIE_TABLE }}
+      SUPABASE_BOOK_TABLE: ${{ secrets.SUPABASE_BOOK_TABLE }}
       TMDB_KEY: ${{ secrets.TMDB_KEY }}
 
     strategy:
