@@ -49,7 +49,10 @@ class DatabaseService:
         elif medium == Medium.BOOKS:
             table = SUPABASE_BOOK_TABLE
         else:
+            print('Invalid medium:', medium)
             raise ValueError("Invalid medium")
+
+        print('table=', table)
 
         try:
             response = (
