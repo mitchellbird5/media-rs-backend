@@ -3,7 +3,7 @@ from scipy.sparse import save_npz
 
 from media_rs.utils.movies.load_movie_data import load_all_movie_data
 from media_rs.utils.movies.build_content_features import build_content_column
-from media_rs.utils.movies.build_user_item_matrix import build_user_item_matrix
+from media_rs.utils.build_user_item_matrix import build_user_item_matrix
 from media_rs.training.features.embeddings import (
     compute_sbert_embeddings, 
     compute_tfidf_embeddings,
@@ -12,7 +12,7 @@ from media_rs.training.features.embeddings import (
 from media_rs.training.build.build_topk_graphs import build_item_cf_topk, build_topk_content
 from media_rs.training.build.build_faiss_indices import build_faiss_indices
 
-from media_rs.utils.movies.build_item_index import build_item_index
+from media_rs.utils.movies.build_item_index import build_movie_item_index
 from media_rs.utils.load_data import save_pickle, save_numpy, save_faiss_index
 
 save_dir = Path("data/movies/cache/")
@@ -35,15 +35,14 @@ movies = build_content_column(movies)
 content = movies["content"].values
 
 # build item index
-item_index = build_item_index(movies, links)
+item_index = build_movie_item_index(movies, links)
 
 # -----------------------------
 # Build user-item matrix
 # -----------------------------
 user_item_matrix, userId_to_idx, idx_to_userId = build_user_item_matrix(
     ratings, 
-    movies, 
-    item_index["movieId_to_idx"]
+    item_index["itemId_to_idx"]
 )
 
 user_index = {

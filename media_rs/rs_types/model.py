@@ -12,3 +12,7 @@ class EmbeddingMethod(Enum):
 
 IdxToTitle = Dict[int, str]
 TitleToIdx = Dict[str, int]
+
+class Medium(str, Enum):
+    MOVIES = "movies"
+    BOOKS = "books"

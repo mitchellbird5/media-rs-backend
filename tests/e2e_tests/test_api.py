@@ -6,72 +6,108 @@ from api.app import app
 def api_client():
     return TestClient(app)
 
+
+# -----------------------------
+# Shared test data
+# -----------------------------
+CONTENT_TITLES = {
+    "movies": "Toy Story (1995)",
+    "books": "Don Quixote",
+}
+
+DESCRIPTIONS = {
+    "movies": "fun animated movie",
+    "books": "fantasy novel about a young wizard",
+}
+
+USER_RATINGS = {
+    "movies": [
+        {"name": "Toy Story 2 (1999)", "value": 5},
+        {"name": "Forrest Gump (1994)", "value": 3},
+    ],
+    "books": [
+        {"name": "Don Quixote", "value": 5},
+        {"name": "The Count of Monte Cristo", "value": 4},
+    ],
+}
+
+
+# -----------------------------
+# Content-based recommendation
+# -----------------------------
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
-def test_content_api_e2e(api_client, embedding_method):
+@pytest.mark.parametrize("medium", ["movies", "books"])
+def test_content_api_e2e(api_client, embedding_method, medium):
     response = api_client.get(
         "/api/recommend/content",
         params={
-            "movie_title": "Toy Story (1995)",
+            "title": CONTENT_TITLES[medium],
             "top_n": 2,
             "embedding_method": embedding_method,
+            "medium": medium,
         },
     )
 
     assert response.status_code == 200
     data = response.json()
-
     assert isinstance(data, list)
     assert len(data) != 0
 
 
-
+# -----------------------------
+# Content-based recommendation from description
+# -----------------------------
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
-def test_content_description_api_e2e(api_client, embedding_method):
+@pytest.mark.parametrize("medium", ["movies", "books"])
+def test_content_description_api_e2e(api_client, embedding_method, medium):
     response = api_client.get(
         "/api/recommend/content-description",
         params={
-            "description": "fun animated movie",
+            "description": DESCRIPTIONS[medium],
             "top_n": 2,
             "embedding_method": embedding_method,
+            "medium": medium,
         },
     )
 
     assert response.status_code == 200
     data = response.json()
-
     assert isinstance(data, list)
     assert len(data) != 0
 
 
-
-
-def test_item_cf_api_e2e(api_client):
+# -----------------------------
+# Item-based collaborative filtering
+# -----------------------------
+@pytest.mark.parametrize("medium", ["movies", "books"])
+def test_item_cf_api_e2e(api_client, medium):
     response = api_client.get(
         "/api/recommend/item-cf",
         params={
-            "movie_title": "Toy Story (1995)",
+            "title": CONTENT_TITLES[medium],
             "top_n": 2,
+            "medium": medium,
         },
     )
 
     assert response.status_code == 200
     data = response.json()
-
     assert isinstance(data, list)
     assert len(data) != 0
 
 
-
+# -----------------------------
+# User-based collaborative filtering
+# -----------------------------
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
-def test_user_cf_api_e2e(api_client, embedding_method):
+@pytest.mark.parametrize("medium", ["movies", "books"])
+def test_user_cf_api_e2e(api_client, embedding_method, medium):
     payload = {
-        "ratings": [
-            {"name": "Toy Story 2 (1999)", "value": 5},
-            {"name": "Forrest Gump (1994)", "value": 3},
-        ],
+        "ratings": USER_RATINGS[medium],
         "top_n": 2,
         "k_similar_users": 2,
         "embedding_method": embedding_method,
+        "medium": medium,
     }
 
     response = api_client.post(
@@ -81,26 +117,25 @@ def test_user_cf_api_e2e(api_client, embedding_method):
 
     assert response.status_code == 200
     data = response.json()
-
     assert isinstance(data, list)
     assert len(data) != 0
 
 
-
-
+# -----------------------------
+# Hybrid recommendation
+# -----------------------------
 @pytest.mark.parametrize("embedding_method", ["SBERT", "TFIDF"])
-def test_hybrid_api_e2e(api_client, embedding_method):
+@pytest.mark.parametrize("medium", ["movies", "books"])
+def test_hybrid_api_e2e(api_client, embedding_method, medium):
     payload = {
-        "movie_title": "Toy Story (1995)",
-        "ratings": [
-            {"name": "Toy Story 2 (1999)", "value": 5},
-            {"name": "Forrest Gump (1994)", "value": 3},
-        ],
+        "title": CONTENT_TITLES[medium],
+        "ratings": USER_RATINGS[medium],
         "alpha": 0.4,
         "beta": 0.3,
         "top_n": 2,
         "k_similar_users": 2,
         "embedding_method": embedding_method,
+        "medium": medium,
     }
 
     response = api_client.post(
@@ -110,30 +145,35 @@ def test_hybrid_api_e2e(api_client, embedding_method):
 
     assert response.status_code == 200
     data = response.json()
-
     assert isinstance(data, list)
     assert len(data) != 0
 
 
-def test_movie_search_api_e2e(api_client):
+# -----------------------------
+# Medium search
+# -----------------------------
+@pytest.mark.parametrize("medium", ["movies", "books"])
+def test_medium_search_api_e2e(api_client, medium):
     response = api_client.get(
-        "/api/movies/search",
+        "/api/medium/search",
         params={
             "query": "Toy Story",
             "limit": 5,
+            "media": "movies",
+            "medium": medium,
         },
     )
 
     assert response.status_code == 200
     data = response.json()
-
     assert isinstance(data, list)
     assert len(data) == 5
-
-    titles = [movie["title"] for movie in data]
-    assert any("Toy Story" in title for title in titles)
+    assert any("Toy Story" in item["title"] for item in data)
 
 
+# -----------------------------
+# Movie data 
+# -----------------------------
 def test_movie_data_api_e2e(api_client):
     response = api_client.get(
         "/api/movies/data",
