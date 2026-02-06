@@ -5,9 +5,9 @@ from typing import List, Dict, Any
 from media_rs.utils.rate_limit import RateLimiter
 from media_rs.rs_types.model import Medium
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY") 
