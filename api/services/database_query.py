@@ -55,7 +55,7 @@ class DatabaseService:
             response = (
                 client
                 .table(table)
-                .select("itemId, title")
+                .select("*")
                 .ilike("title", f"%{query}%")
                 .order("title")
                 .limit(limit)
