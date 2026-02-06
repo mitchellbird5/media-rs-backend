@@ -45,10 +45,14 @@ class DatabaseService:
             raise Exception("Rate limit exceeded")
 
         print("medium =", medium)
+        print("SUPABASE_MOVIE_TABLE =", SUPABASE_MOVIE_TABLE)
+        print("SUPABASE_BOOK_TABLE =", SUPABASE_BOOK_TABLE)
 
         if medium == Medium.MOVIES:
+            print('Setting table to ', SUPABASE_MOVIE_TABLE)
             table = SUPABASE_MOVIE_TABLE
         elif medium == Medium.BOOKS:
+            print('Setting table to ', SUPABASE_BOOK_TABLE)
             table = SUPABASE_BOOK_TABLE
         else:
             print('Invalid medium:', medium)
