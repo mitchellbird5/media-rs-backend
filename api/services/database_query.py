@@ -44,6 +44,8 @@ class DatabaseService:
             # Fail fast – don't hit Supabase
             raise Exception("Rate limit exceeded")
 
+        print("medium =", medium)
+
         if medium == Medium.MOVIES:
             table = SUPABASE_MOVIE_TABLE
         elif medium == Medium.BOOKS:
@@ -52,7 +54,7 @@ class DatabaseService:
             print('Invalid medium:', medium)
             raise ValueError("Invalid medium")
 
-        print('table=', table)
+        print('table =', table)
 
         try:
             response = (
