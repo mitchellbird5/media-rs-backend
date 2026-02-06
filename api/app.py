@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.views import router
 
+from media_rs.utils.data_cache import DataCache
+
 app = FastAPI(title="Media Recommender API")
 
 @app.get("/")
@@ -25,8 +27,10 @@ app.add_middleware(
 
 app.include_router(router)
 
-from media_rs.utils.movies.movie_data_cache import MovieDataCache
-
-cache = MovieDataCache(repo_id=os.getenv("HF_REPO_ID"))
-cache.warmup()
-print("MovieDataCache warmup finished")
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    global cache
+    cache = DataCache(repo_id=os.getenv("HF_REPO_ID"))
+    cache.warmup()  # if warmup is async; otherwise just cache.warmup()
+    print("DataCache warmup finished")

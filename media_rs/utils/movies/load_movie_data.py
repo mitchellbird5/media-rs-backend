@@ -1,6 +1,5 @@
 import pandas as pd
 import re
-import unicodedata
 
 from pathlib import Path
 from typing import Tuple
@@ -8,28 +7,6 @@ from typing import Tuple
 from media_rs.utils.load_data import (
     load_dataframe
 )
-
-def norm(title: str) -> str:
-    if not title:
-        return ""
-
-    # Unicode normalization (é → é)
-    title = unicodedata.normalize("NFKC", title)
-
-    # Lowercase
-    title = title.lower()
-
-    # Strip surrounding whitespace
-    title = title.strip()
-
-    # Replace common punctuation with spaces
-    title = re.sub(r"[^\w\s()\-]", " ", title)
-    title = re.sub(r"[()]", "", title)
-
-    # Collapse whitespace
-    title = re.sub(r"\s+", " ", title)
-
-    return title
 
 def remove_year_from_title(title: str) -> str:
     """
@@ -79,6 +56,11 @@ def load_all_movie_data(
     ratings = load_dataframe(wdir.joinpath("ratings.csv"))
     tags = load_dataframe(wdir.joinpath("tags.csv"))
     links = load_dataframe(wdir.joinpath("links.csv"))
+    
+    movies = movies.rename(columns={"movieId" : "itemId"})
+    ratings = ratings.rename(columns={"movieId" : "itemId"})
+    tags = tags.rename(columns={"movieId" : "itemId"})
+    links = links.rename(columns={"movieId" : "itemId"})
 
     movies = add_tags_to_movies(movies, tags)
     movies = add_title_no_year_column(movies)
@@ -90,10 +72,10 @@ def add_tags_to_movies(
     movies: pd.DataFrame, 
     tags: pd.DataFrame
 ) -> pd.DataFrame:
-    # Group tags by movieId
-    movie_tags = tags.groupby('movieId')['tag'].apply(lambda x: ' '.join(x)).reset_index()
+    # Group tags by itemId
+    movie_tags = tags.groupby('itemId')['tag'].apply(lambda x: ' '.join(x)).reset_index()
     # Merge with movies
-    movies = movies.merge(movie_tags, on='movieId', how='left')
+    movies = movies.merge(movie_tags, on='itemId', how='left')
     movies['tag'] = movies['tag'].fillna('')
     return movies
 

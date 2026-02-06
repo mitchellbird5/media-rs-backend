@@ -31,13 +31,14 @@ COPY pyproject.toml poetry.lock* README.md requirements.txt ./
 FROM base AS dev
 
 # Install all deps (including dev)
-RUN poetry install --no-interaction --no-ansi --with dev
+RUN poetry install --no-interaction --no-ansi --with dev --no-root
 
 # Copy app code
 COPY . .
 
 # Dev server with debugger
-CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
 
 # =====================================================
 # Prod stage

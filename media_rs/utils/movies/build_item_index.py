@@ -1,32 +1,37 @@
-from media_rs.utils.movies.load_movie_data import norm
+import pandas as pd
 
-def build_item_index(movies, links):
-    idx_to_movieId = dict(enumerate(movies["movieId"].values))
-    movieId_to_idx = {mid: idx for idx, mid in idx_to_movieId.items()}
+from typing import Dict, Any
 
-    movieId_to_title = dict(zip(movies["movieId"], movies["title"]))
-    title_to_movieId = {title: mid for mid, title in movieId_to_title.items()}
+def build_movie_item_index(
+    movies: pd.DataFrame, 
+    links: pd.DataFrame
+) -> Dict[str, Any]:
+    idx_to_itemId = dict(enumerate(movies["itemId"].values))
+    itemId_to_idx = {mid: idx for idx, mid in idx_to_itemId.items()}
 
-    movieId_to_imdbId = dict(zip(links["movieId"], links["imdbId"]))
-    movieId_to_tmdbId = dict(zip(links["movieId"], links["tmdbId"]))
+    itemId_to_title = dict(zip(movies["itemId"], movies["title"]))
+    title_to_itemId = {title: mid for mid, title in itemId_to_title.items()}
 
-    imdbId_to_movieId = {imdb: mid for mid, imdb in movieId_to_imdbId.items()}
-    tmdbId_to_movieId = {tmdb: mid for mid, tmdb in movieId_to_tmdbId.items()}
+    itemId_to_imdbId = dict(zip(links["itemId"], links["imdbId"]))
+    itemId_to_tmdbId = dict(zip(links["itemId"], links["tmdbId"]))
+
+    imdbId_to_itemId = {imdb: mid for mid, imdb in itemId_to_imdbId.items()}
+    tmdbId_to_itemId = {tmdb: mid for mid, tmdb in itemId_to_tmdbId.items()}
 
     return {
         "num_items": len(movies),
 
         # index layer
-        "idx_to_movieId": idx_to_movieId,
-        "movieId_to_idx": movieId_to_idx,
+        "idx_to_itemId": idx_to_itemId,
+        "itemId_to_idx": itemId_to_idx,
 
         # presentation layer
-        "movieId_to_title": movieId_to_title,
-        "title_to_movieId": title_to_movieId,
+        "itemId_to_title": itemId_to_title,
+        "title_to_itemId": title_to_itemId,
 
         # external IDs
-        "movieId_to_imdbId": movieId_to_imdbId,
-        "movieId_to_tmdbId": movieId_to_tmdbId,
-        "imdbId_to_movieId": imdbId_to_movieId,
-        "tmdbId_to_movieId": tmdbId_to_movieId,
+        "itemId_to_imdbId": itemId_to_imdbId,
+        "itemId_to_tmdbId": itemId_to_tmdbId,
+        "imdbId_to_itemId": imdbId_to_itemId,
+        "tmdbId_to_itemId": tmdbId_to_itemId,
     }
