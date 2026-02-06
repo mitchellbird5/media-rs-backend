@@ -10,9 +10,8 @@ from api.services.collab_services import (
     get_user_cf_recommendations
 )
 from api.services.hybrid_services import get_hybrid_recommendations
-from api.services.tmdb import get_multiple_movie_data
-from api.services.database_query import DatabaseService
-from media_rs.utils.session import get_or_create_session_id
+from api.services.media_data.get_media_data import get_media_data
+from api.services.database_query import query_database
 from media_rs.rs_types.model import EmbeddingMethod, Medium
 
 from .serializers import (
@@ -143,18 +142,11 @@ def medium_search(
     Automatically sets a session cookie if missing.
     """
     response = Response()
-    
     mediumEnum = get_medium(medium)
-
     try:
-        # Get session_id from cookie, or create a new one
-        sid = get_or_create_session_id(
-            response, sid=None
-        )
-
-        results = DatabaseService.search_database(
-            query=query,
-            user_key=f"session:{sid}",
+        results = query_database(
+            response=response,
+            title=query,
             medium=mediumEnum,
             limit=limit
         )
@@ -167,12 +159,16 @@ def medium_search(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/movies/data")
-def movie_data(titles: List[str] = Query(...)):
+@router.get("/data")
+def movie_data(
+    titles: List[str] = Query(...),
+    medium: str = Query(...)
+):
+    mediumEnum = get_medium(medium)
     if not titles:
         raise HTTPException(status_code=400, detail="At least one title required")
     try:
-        data = get_multiple_movie_data(titles)
+        data = get_media_data(titles, mediumEnum)
         return [d.__dict__ for d in data]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

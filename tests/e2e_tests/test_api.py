@@ -15,6 +15,12 @@ CONTENT_TITLES = {
     "books": "Don Quixote",
 }
 
+CONTENT_TITLES_LIST = {
+    "movies": ["Toy Story (1995)", "Forrest Gump (1994)"],
+    "books": ["Don Quixote", "The Count of Monte Cristo"],
+}
+
+
 DESCRIPTIONS = {
     "movies": "fun animated movie",
     "books": "fantasy novel about a young wizard",
@@ -171,14 +177,13 @@ def test_medium_search_api_e2e(api_client, medium):
 # -----------------------------
 # Movie data 
 # -----------------------------
-def test_movie_data_api_e2e(api_client):
+@pytest.mark.parametrize("medium", ["movies", "books"])
+def test_data_api_e2e(api_client, medium):
     response = api_client.get(
-        "/api/movies/data",
+        "/api/data",
         params={
-            "titles": [
-                "Toy Story (1995)",
-                "Forrest Gump (1994)",
-            ]
+            "titles": CONTENT_TITLES_LIST[medium],
+            "medium": medium
         },
     )
 
@@ -189,8 +194,5 @@ def test_movie_data_api_e2e(api_client):
     assert len(data) == 2
 
     for item in data:
-        assert item.get("title") is not None
-        assert item.get("poster_path") is not None
-        assert item.get("backdrop_path") is not None
-        assert item.get("genres") is not None
-        assert isinstance(item["genres"], dict)
+        for k,v in item.items():
+            assert v is not None

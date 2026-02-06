@@ -1,7 +1,9 @@
 import os
 from supabase import create_client, Client
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+from fastapi import Response
 
+from media_rs.utils.session import get_or_create_session_id
 from media_rs.utils.rate_limit import RateLimiter
 from media_rs.rs_types.model import Medium
 
@@ -65,3 +67,19 @@ class DatabaseService:
 
         except Exception as e:
             raise Exception(f"Supabase error: {e}")
+        
+def query_database(
+    response: Response,
+    title: str,
+    medium: Medium,
+    limit: int = 5
+) -> Dict[str, Any]:
+    sid = get_or_create_session_id(
+        response, sid=None
+    )
+    return DatabaseService.search_database(
+        query=title,
+        user_key=f"session:{sid}",
+        medium=medium,
+        limit=limit
+    )
