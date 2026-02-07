@@ -16,8 +16,12 @@ CONTENT_TITLES = {
 }
 
 CONTENT_TITLES_LIST = {
-    "movies": ["Toy Story (1995)", "Forrest Gump (1994)"],
-    "books": ["Don Quixote", "The Count of Monte Cristo"],
+    "movies": ["Toy Story (1995)", "Toy Story 2 (1999)", "Forrest Gump (1994)"],
+    "books": [
+        "Harry Potter and the Chamber of Secrets (Harry Potter, #2)",
+        "Don Quixote", 
+        "The Count of Monte Cristo"
+    ],
 }
 
 
@@ -191,7 +195,7 @@ def test_data_api_e2e(api_client, medium):
     data = response.json()
 
     assert isinstance(data, list)
-    assert len(data) == 2
+    assert len(data) == 3
 
     for item in data:
         for k,v in item.items():
