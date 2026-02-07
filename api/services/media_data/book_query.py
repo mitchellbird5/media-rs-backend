@@ -14,7 +14,8 @@ class BookData:
     url: Optional[str] = None
     authors: Optional[str] = None
     lang: Optional[str] = None
-    cover_id: Optional[str] = None
+    cover_id: Optional[int] = None
+    img: Optional[str] = None
     year: Optional[str] = None
     description: Optional[str] = None
     
@@ -36,6 +37,7 @@ def get_book_data(title: str) -> BookData:
             authors=result.get("authors"),
             lang=result.get("lang"),
             cover_id=ol_details.get("cover_i"),
+            img=result.get("img"),
             year=result.get("year"),
             description=result.get("description")
         )
