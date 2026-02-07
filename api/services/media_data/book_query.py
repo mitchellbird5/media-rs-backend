@@ -5,6 +5,7 @@ from fastapi import Response
 from media_rs.utils.session import get_or_create_session_id
 from media_rs.rs_types.model import Medium
 from api.services.database_query import query_database
+from api.services.media_data.open_library import get_open_library_details
 
 @dataclass
 class BookData:
@@ -13,7 +14,7 @@ class BookData:
     url: Optional[str] = None
     authors: Optional[str] = None
     lang: Optional[str] = None
-    img: Optional[str] = None
+    cover_id: Optional[str] = None
     year: Optional[str] = None
     description: Optional[str] = None
     
@@ -27,13 +28,14 @@ def get_book_data(title: str) -> BookData:
     )
     if results:
         result = results[0]
+        ol_details = get_open_library_details(title)
         return BookData(
             title=result.get("title", title),
             itemId=result.get("itemId"),
             url=result.get("url"),
             authors=result.get("authors"),
             lang=result.get("lang"),
-            img=result.get("img"),
+            cover_id=ol_details.get("cover_i"),
             year=result.get("year"),
             description=result.get("description")
         )
